@@ -3,19 +3,90 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #e4f6e4;
   --foreground: #171717;
+  --color_primary: #f8d210;
+  --color_secondary: #428d42;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --color_primary: #90ee90;
+  --color_secondary: #ffe66d;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-space);
+  background-color: var(--background);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* btn 3d effect */
+.btn3d {
+  color: black;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 4px 5px 0 0 var(--foreground);
+}
+
+.btn3d:hover {
+  transform: translateY(4px) translateX(2px);
+  box-shadow: 0 0 0 0 var(--foreground);
+}
+
+.btn3d:active {
+  background-color: red;
+  transform: translateY(-2px) translateX(-1px);
+  box-shadow: 0 0 0 0 black;
+}
+
+/* text stroke */
+.text-shadow {
+  text-shadow: 1px 1px 0px var(--foreground);
+}
+
+.text-stroke {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--foreground);
+}
+
+/* hamburger style */
+.hamburger {
+  cursor: pointer;
+}
+
+.hamburger input {
+  display: none;
+}
+
+.hamburger svg {
+  height: 2rem;
+  transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.line {
+  fill: none;
+  stroke: black;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1), 
+  stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.line-top-bottom {
+  stroke-dasharray: 12 63;
+}
+
+.hamburger input:checked + svg {
+  transform: rotate(-45deg);
+}
+
+.hamburger input:checked + svg .line-top-bottom {
+  stroke-dasharray: 20 300;
+  stroke-dashoffset: -32.42;
 }
