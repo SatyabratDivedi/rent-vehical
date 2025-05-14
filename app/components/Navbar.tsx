@@ -9,7 +9,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <div className='border-b-2 border-foreground'>
+    <div className='border-b-2 border-foreground h-[13vh]'>
       <nav className='flex justify-between items-center container px-5 m-auto text-xl py-5'>
         <Link href={'/'} className=' cursor-pointer text-2xl lg:text-3xl font-semibold space-x-1 lg:space-x-2'>
           <span >R</span>
@@ -34,9 +34,9 @@ export default function Navbar() {
             </Link>
           </li>
         </ul> */}
-        <div className='space-x-2'>
-          <HoverButton radius={10} value={'Start'} px={2} py={0.5} />
-        </div>
+        <Link href='/handler/sign-up' className='space-x-2'>
+          <HoverButton radius={10} value={'Login'} px={2} py={0.5} />
+        </Link>
         <div className='fixed z-50 bottom-2 right-2 bg-foreground rounded-full h-7 w-7 flex items-center justify-center'>
           <ThemeToggle />
         </div>
