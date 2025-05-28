@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { Providers } from './providers';
 import Navbar from './components/Navbar';
+import { Toaster } from 'react-hot-toast';
 
 const firaCode = Fira_Code({
   subsets: ['latin'],
@@ -38,6 +39,7 @@ export default function RootLayout({
     <html lang='en'>
       <body className={`${firaCode.variable} ${spaceMono.variable} ${sueEllenFrancisco.variable} antialiased`}>
         <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+          <Toaster reverseOrder={false}/>
           <Navbar />
           <Providers>{children}</Providers>
         </ThemeProvider>

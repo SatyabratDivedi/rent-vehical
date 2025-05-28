@@ -5,6 +5,7 @@ import Features from './components/Features';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -15,7 +16,9 @@ export default function Home() {
         <h2 className='text-sm'>Search nearby rentals instantly - No fees, no hassle</h2>
         <div className='space-x-3 flex'>
           <HoverButton radius={15} value={'Find a vehicle'} px={1} py={1} />
-          <HoverButton radius={15} value={'List your vehicle'} px={1} py={1} />
+          <Link href={'/vehicle'}>
+            <HoverButton radius={15} value={'List your vehicle'} px={1} py={1} />
+          </Link>
         </div>
       </div>
 
