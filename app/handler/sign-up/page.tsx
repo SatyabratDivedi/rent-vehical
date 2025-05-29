@@ -187,7 +187,7 @@ export default function SignUp() {
         </div>
 
         <p className='mt-8 text-center text-sm text-gray-500'>
-          Already have an account?{' '}
+          Already have an account?
           <Link href='/handler/sign-in' className='text-primary hover:underline'>
             Sign in
           </Link>

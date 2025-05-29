@@ -1,18 +1,70 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import HoverButton from './HoverButton';
 import ThemeToggle from '../ThemeToggle';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { setUser } from '../../redux/slice/userSlice';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [userName, setUserName] = useState('Loading...');
+  const userDetails = useSelector((store: RootState) => store.user.value);
+  const dispatch = useDispatch();
+
+  const checkUserAuth = async () => {
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        setUserName('Not logged in');
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/checkUser`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+        next: { revalidate: 0 },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.userDetails) {
+          setUserName(data.userDetails.name || 'Logged In User');
+          dispatch(setUser(data.userDetails));
+        } else {
+          setUserName('Invalid user data');
+        }
+      } else {
+        setUserName('Not authenticated');
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setUserName('Error checking auth');
+    }
+  };
+
+  useEffect(() => {
+    checkUserAuth();
+  }, []);
 
   return (
     <div className='border-b-2 border-foreground h-[13vh]'>
       <nav className='flex justify-between items-center container px-5 m-auto text-xl py-5'>
         <Link href={'/'} className=' cursor-pointer text-2xl lg:text-3xl font-semibold space-x-1 lg:space-x-2'>
-          <span >R</span>
+          <span>R</span>
           <span className='text-secondary'>E</span>
           <span>N</span>
           <span className='text-secondary'>T</span>
@@ -34,6 +86,7 @@ export default function Navbar() {
             </Link>
           </li>
         </ul> */}
+        <div>{userName}</div>
         <Link href='/handler/sign-up' className='space-x-2'>
           <HoverButton radius={10} value={'Login'} px={2} py={0.5} />
         </Link>
