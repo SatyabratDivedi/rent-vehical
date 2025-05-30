@@ -97,7 +97,7 @@ export default function VehiclePage() {
         .split('; ')
         .find((row) => row.startsWith('token='))
         ?.split('=')[1];
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/vehicle/create-vehicle`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/create-vehicle`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

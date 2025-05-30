@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { FaGoogle, FaGithub, FaEyeSlash, FaEye } from 'react-icons/fa';
+import { FaGoogle, FaGithub, FaEyeSlash, FaEye, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -34,7 +34,7 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/signup`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,11 @@ export default function SignUp() {
   };
 
   return (
-    <div className=' flex h-[87vh] items-center justify-center bg-background'>
+    <div className=' flex h-[100vh] items-center justify-center bg-background'>
+      <Link href='/' className='absolute top-6 left-6 flex items-center text-gray-400 hover:text-primary transition-colors group'>
+        <FaArrowLeft className='mr-2' />
+        <span className='group-hover:underline'>Back to Home</span>
+      </Link>
       <div className='bg-white/10 backdrop-blur-lg p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20'>
         <h2 className='text-2xl font-bold mb-6 text-center'>Create Account</h2>
 

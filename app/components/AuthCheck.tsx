@@ -21,7 +21,7 @@ const AuthCheck = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/checkUser`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/checkUser`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

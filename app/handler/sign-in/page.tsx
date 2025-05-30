@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { FaGoogle, FaGithub, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaGoogle, FaGithub, FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -29,14 +29,14 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/signin`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ mobile: number, password }),
       });
-      
+
       const data = await response.json();
       if (response.ok) {
         toast.success('Signed in successfully!');
@@ -58,7 +58,11 @@ export default function SignIn() {
   };
 
   return (
-    <div className='h-[87vh] flex items-center justify-center bg-background'>
+    <div className='h-[100vh] flex items-center justify-center bg-background'>
+      <Link href='/' className='absolute top-6 left-6 flex items-center text-gray-400 hover:text-primary transition-colors group'>
+        <FaArrowLeft className='mr-2' />
+        <span className='group-hover:underline'>Back to Home</span>
+      </Link>
       <div className='bg-white/10 backdrop-blur-lg p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20'>
         <h2 className='text-2xl font-bold mb-6 text-center'>Welcome Back</h2>
 
