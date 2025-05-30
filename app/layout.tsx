@@ -6,6 +6,8 @@ import { Providers } from './providers';
 import Navbar from './components/Navbar';
 import { Toaster } from 'react-hot-toast';
 import { ReduxProvider } from './providers/ReduxProvider';
+import AuthCheck from './components/AuthCheck';
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const firaCode = Fira_Code({
   subsets: ['latin'],
@@ -40,11 +42,13 @@ export default function RootLayout({
     <html lang='en'>
       <body className={`${firaCode.variable} ${spaceMono.variable} ${sueEllenFrancisco.variable} antialiased`}>
         <ReduxProvider>
-          <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-            <Toaster reverseOrder={false} />
-            <Navbar />
-            <Providers>{children}</Providers>
-          </ThemeProvider>
+          <AuthCheck>
+            <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+              <Toaster reverseOrder={false} />
+              <Navbar />
+              <Providers>{children}</Providers>
+            </ThemeProvider>
+          </AuthCheck>
         </ReduxProvider>
       </body>
     </html>

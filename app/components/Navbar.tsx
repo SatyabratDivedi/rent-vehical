@@ -1,10 +1,11 @@
+// app/components/Navbar.tsx
 'use client';
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import HoverButton from './HoverButton';
 import ThemeToggle from '../ThemeToggle';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { setUser } from '../../redux/slice/userSlice';
@@ -15,8 +16,10 @@ export default function Navbar() {
   const [userName, setUserName] = useState('Loading...');
   const userDetails = useSelector((store: RootState) => store.user.value);
   const dispatch = useDispatch();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const checkUserAuth = async () => {
+  const checkUser = async () => {
     try {
       const token = document.cookie
         .split('; ')
@@ -24,41 +27,45 @@ export default function Navbar() {
         ?.split('=')[1];
 
       if (!token) {
-        setUserName('Not logged in');
+        setUserName('Guest');
         return;
       }
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/checkUser`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
-        next: { revalidate: 0 },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        if (data.userDetails) {
-          setUserName(data.userDetails.name || 'Logged In User');
-          dispatch(setUser(data.userDetails));
-        } else {
-          setUserName('Invalid user data');
-        }
-      } else {
-        setUserName('Not authenticated');
+      if(userDetails?.id){
+        setUserName(userDetails.name)
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      setUserName('Error checking auth');
+      setUserName('Guest');
     }
   };
 
   useEffect(() => {
-    checkUserAuth();
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
+
+  useEffect(() => {
+    checkUser();
+  }, [pathname, userDetails.id]);
+
+  const handleLogout = () => {
+    document.cookie = 'token=; path=/; max-age=0; SameSite=Strict';
+    dispatch(setUser({ id: '', email: '', name: '' }));
+    setShowDropdown(false);
+    setUserName('Guest');
+    router.push('/');
+  };
+
+  if (pathname.split('/')[1] == 'handler') {
+    return <div></div>;
+  }
 
   return (
     <div className='border-b-2 border-foreground h-[13vh]'>
@@ -69,38 +76,54 @@ export default function Navbar() {
           <span>N</span>
           <span className='text-secondary'>T</span>
         </Link>
-        {/* <ul className='flex gap-4'>
-          <li>
-            <Link href='/' className={pathname === '/' ? 'font-bold' : ''}>
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link href='/about' className={pathname.includes('/about') ? 'font-bold' : ''}>
-              About
-            </Link>
-          </li>
-          <li>
-            <Link href='/contact' className={pathname === '/contact' ? 'font-bold' : ''}>
-              Contact
-            </Link>
-          </li>
-        </ul> */}
-        <div>{userName}</div>
-        <Link href='/handler/sign-up' className='space-x-2'>
-          <HoverButton radius={10} value={'Login'} px={2} py={0.5} />
-        </Link>
+
+        {/* Profile Icon and Dropdown */}
+        <div className='relative' ref={dropdownRef}>
+          <button onClick={() => setShowDropdown(!showDropdown)} className='flex items-center space-x-2 focus:outline-none'>
+            <div className='h-10 w-10 rounded-full bg-secondary text-white flex items-center justify-center hover:bg-secondary/90 transition-colors'>
+              <svg xmlns='http://www.w3.org/2000/svg' className='h-6 w-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' />
+              </svg>
+            </div>
+            <span className='hidden md:inline text-sm'>{userName}</span>
+          </button>
+
+          {showDropdown && (
+            <div className='absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-background border border-border z-50'>
+              <div className='py-1'>
+                {userDetails.id ? (
+                  <>
+                    <div className='px-4 py-2 text-sm border-b border-border'>
+                      Signed in as <span className='font-medium'>{userDetails.name}</span>
+                    </div>
+                    <Link href='/dashboard' className='block px-4 py-2 text-sm hover:bg-muted transition-colors' onClick={() => setShowDropdown(false)}>
+                      Dashboard
+                    </Link>
+                    <Link href='/profile' className='block px-4 py-2 text-sm hover:bg-muted transition-colors' onClick={() => setShowDropdown(false)}>
+                      Profile
+                    </Link>
+                    <button onClick={handleLogout} className='block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-muted transition-colors'>
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href='/handler/sign-in' className='block px-4 py-2 text-sm hover:bg-muted transition-colors' onClick={() => setShowDropdown(false)}>
+                      Sign in
+                    </Link>
+                    <Link href='/handler/sign-up' className='block px-4 py-2 text-sm hover:bg-muted transition-colors' onClick={() => setShowDropdown(false)}>
+                      Create account
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className='fixed z-50 bottom-2 right-2 bg-foreground rounded-full h-7 w-7 flex items-center justify-center'>
           <ThemeToggle />
         </div>
-
-        {/* <label className='hamburger'>
-          <input type='checkbox' />
-          <svg viewBox='0 0 32 32'>
-            <path className='line line-top-bottom' d='M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22'></path>
-            <path className='line' d='M7 16 27 16'></path>
-          </svg>
-        </label> */}
       </nav>
     </div>
   );
