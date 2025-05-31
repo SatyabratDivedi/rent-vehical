@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import { ReduxProvider } from './providers/ReduxProvider';
 import AuthCheck from './components/AuthCheck';
 import 'react-loading-skeleton/dist/skeleton.css'
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const firaCode = Fira_Code({
   subsets: ['latin'],
@@ -49,6 +50,7 @@ export default function RootLayout({
               <Providers>{children}</Providers>
             </ThemeProvider>
           </AuthCheck>
+          <SpeedInsights/>
         </ReduxProvider>
       </body>
     </html>
