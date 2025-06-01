@@ -15,8 +15,10 @@ export default function Home() {
         <div className='lg:text-xl font-bold'>Search for pickup, autos, boloro, tractors and etc, near you – No hidden fees, just convenience.</div>
         <h2 className='text-sm'>Search nearby rentals instantly - No fees, no hassle</h2>
         <div className='space-x-3 flex'>
-          <HoverButton radius={15} value={'Find a vehicle'} px={1} py={1} />
-          <Link href={'/vehicle'}>
+          <Link href={'/vehicles'}>
+            <HoverButton radius={15} value={'Find a vehicle'} px={1} py={1} />
+          </Link>
+          <Link href={'/vehicle-listing'}>
             <HoverButton radius={15} value={'List your vehicle'} px={1} py={1} />
           </Link>
         </div>

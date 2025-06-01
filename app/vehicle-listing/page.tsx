@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import ProtectedRoute from '../components/ProtectedRoute';
+import { useRouter } from 'next/navigation';
 
 interface FormData {
   title: string;
@@ -30,6 +31,7 @@ export default function VehiclePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string>('');
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -153,6 +155,12 @@ export default function VehiclePage() {
   return (
     <ProtectedRoute>
       <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+       <button onClick={() => router.push('/')} className='flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 mb-4'>
+            <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
+            </svg>
+            Back to Home
+          </button>
         <div className='max-w-2xl mx-auto'>
           <div className='bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden'>
             <div className='bg-gradient-to-r from-blue-600 to-indigo-600 p-6'>
@@ -172,7 +180,7 @@ export default function VehiclePage() {
                 <label htmlFor='title' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   Vehicle Title *
                 </label>
-                <input type='text' id='title' name='title' value={formData.title} onChange={handleInputChange} className='w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200' placeholder='e.g., Toyota Camry 2020' required />
+                <input type='text' id='title' name='title' value={formData.title} onChange={handleInputChange} className='w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200' placeholder='e.g., Toyota Camry 2020' />
               </div>
 
               {/* Description Field */}
@@ -188,7 +196,6 @@ export default function VehiclePage() {
                   rows={4}
                   className='w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none transition-all duration-200'
                   placeholder='Describe your vehicle, its condition, features, etc.'
-                  required
                 />
               </div>
 

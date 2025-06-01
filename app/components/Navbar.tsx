@@ -30,8 +30,8 @@ export default function Navbar() {
         setUserName('Guest');
         return;
       }
-      if(userDetails?.id){
-        setUserName(userDetails.name)
+      if (userDetails?.id) {
+        setUserName(userDetails.name);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -63,7 +63,7 @@ export default function Navbar() {
     router.push('/');
   };
 
-  if (pathname.split('/')[1] == 'handler') {
+  if (pathname !== '/') {
     return <div></div>;
   }
 
