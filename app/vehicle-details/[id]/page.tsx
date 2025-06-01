@@ -4,24 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { useRouter, useParams } from 'next/navigation';
-
-interface Vehicle {
-  id: string;
-  title: string;
-  description: string;
-  images: string[];
-  isPublished: boolean;
-  isOwner: boolean;
-  createdAt: string;
-  updatedAt: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    mobile: string;
-    vehiclesCount: number;
-  };
-}
+import { Vehicle } from '@/app/vehicles/page';
 
 // Loading skeleton for vehicle details
 const VehicleDetailsSkeleton = () => (
@@ -318,11 +301,11 @@ const VehicleDetailsPage = () => {
           <div className='flex items-center justify-between'>
             <div>
               <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2'>{vehicle.title}</h1>{' '}
-              <div className='flex items-center space-x-4'>
+              {/* <div className='flex items-center space-x-4'>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${vehicle.isPublished ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>{vehicle.isPublished ? 'Published' : 'Draft'}</span>
                 {vehicle.isOwner && <span className='bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium'>Owner Listed</span>}
                 {isFromCache && <span className='bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 px-3 py-1 rounded-full text-sm font-medium'>Cached</span>}
-              </div>
+              </div> */}
             </div>
 
             <div className='text-right text-sm text-gray-600 dark:text-gray-400'>

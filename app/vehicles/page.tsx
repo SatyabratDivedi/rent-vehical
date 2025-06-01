@@ -5,8 +5,10 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useDispatch } from 'react-redux';
+import { setSingleVehicle, setVehicle } from '@/redux/slice/vehicleSlice';
 
-interface Vehicle {
+export interface Vehicle {
   id: string;
   title: string;
   description: string;
@@ -43,6 +45,7 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
   const [imageError, setImageError] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleImageError = () => {
     setImageError(true);
@@ -69,6 +72,7 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
 
   const handleViewDetails = () => {
     router.push(`/vehicle-details/${vehicle.id}`);
+    dispatch(setSingleVehicle(vehicle)); // Dispatch the selected vehicle to Redux store
   };
 
   return (
@@ -178,6 +182,8 @@ const getCachedData = () => {
       return null;
     }
 
+    console.log('cached vehicles:', data);
+
     return data;
   } catch (error) {
     console.error('Error reading cache:', error);
@@ -209,6 +215,7 @@ const VehicleListPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
   const { theme } = useTheme();
   useEffect(() => {
     loadVehicles();
@@ -252,6 +259,9 @@ const VehicleListPage = () => {
       if (data.success) {
         setVehicles(data.data);
         setCachedData(data.data); // Cache the data
+        console.log('fetched vehicles:', data.data);
+        dispatch(setVehicle(data.data)); // Dispatch to Redux store
+        setVehicles(data.data);
       } else {
         throw new Error(data.error || 'Failed to fetch vehicles');
       }
