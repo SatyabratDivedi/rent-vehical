@@ -6,11 +6,21 @@ import Image from 'next/image';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { useRouter } from 'next/navigation';
 
+// interface Location {
+//   latitude  : String,
+//   longitude : String,
+//   address   : String,
+//   district  : String,
+//   state     : String,
+//   pinCode   : String,
+// }
 interface FormData {
   title: string;
   description: string;
   isOwner: boolean;
+  // contact: string;
   images: File[];
+  // location?: Location;
 }
 
 interface ImagePreview {

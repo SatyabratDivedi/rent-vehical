@@ -113,10 +113,10 @@ const OwnerInfo = ({ user }: { user: Vehicle['user'] }) => (
       <div className='flex-1'>
         <h4 className='font-semibold text-gray-900 dark:text-white'>{user?.name}</h4>
         <p className='text-sm text-gray-600 dark:text-gray-400'>{user?.email}</p>
-        {user?.mobile && <p className='text-sm text-gray-600 dark:text-gray-400'>{user.mobile}</p>}
+        {/* {user?.mobile && <p className='text-sm text-gray-600 dark:text-gray-400'>{user.mobile}</p>}
         <p className='text-xs text-gray-500 dark:text-gray-500 mt-1'>
           {user?.vehiclesCount} vehicle{user?.vehiclesCount !== 1 ? 's' : ''} listed
-        </p>
+        </p> */}
       </div>
     </div>
   </div>
