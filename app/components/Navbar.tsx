@@ -9,6 +9,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { setUser } from '../../redux/slice/userSlice';
+import Image from 'next/image';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -70,11 +71,13 @@ export default function Navbar() {
   return (
     <div className='border-b-2 border-foreground h-[13vh]'>
       <nav className='flex justify-between items-center container px-5 m-auto text-xl py-5'>
+        {/* Logo */}
         <Link href={'/'} className=' cursor-pointer text-2xl lg:text-3xl font-semibold space-x-1 lg:space-x-2'>
-          <span>R</span>
+          <Image width={100} height={100} src='/logo-min.png' alt='Logo' className='h-16 w-16 rounded-full object-cover'/>
+          {/* <span>R</span>
           <span className='text-secondary'>E</span>
           <span>N</span>
-          <span className='text-secondary'>T</span>
+          <span className='text-secondary'>T</span> */}
         </Link>
 
         {/* Profile Icon and Dropdown */}
