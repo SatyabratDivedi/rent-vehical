@@ -35,7 +35,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         });
 
         if (!response.ok) {
-          toast.error('Session expired. Please sign in again.');
           router.push(`/handler/sign-in?redirect=${encodeURIComponent(pathname)}`);
           return;
         }

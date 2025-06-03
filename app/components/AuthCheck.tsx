@@ -9,7 +9,6 @@ const AuthCheck = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   const checkUserAuth = async () => {
-    console.log('check user calling');
     try {
       const token = document.cookie
         .split('; ')
@@ -32,11 +31,15 @@ const AuthCheck = ({ children }: { children: React.ReactNode }) => {
       });
 
       const data = await response.json();
+      console.log('User details:', data);
 
       if (response.ok) {
         dispatch(setUser(data.userDetails));
         if (data.userDetails) {
         }
+      }else{
+        console.error('Failed to fetch user details:', data.message);
+        dispatch(setUser({ id: '', email: '', name: 'Guest' }));
       }
     } catch (error) {
       console.error('Auth check failed:', error);

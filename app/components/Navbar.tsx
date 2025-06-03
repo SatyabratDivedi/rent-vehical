@@ -32,7 +32,9 @@ export default function Navbar() {
         return;
       }
       if (userDetails?.id) {
-        setUserName(userDetails.name);
+        setUserName(userDetails?.name);
+      }else{
+        setUserName('Guest');
       }
     } catch (error) {
       console.error('Auth check failed:', error);

@@ -9,12 +9,10 @@ interface LoaderProps {
 const Loader: React.FC<LoaderProps> = ({ message = 'Loading...' }) => {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-50">
-      <div className="relative w-20 h-20">
+      <div className="relative w-12 h-12 md:w-16 md:h-16">
         {/* Outer spinner */}
         <div className="absolute inset-0 rounded-full border-4 border-secondary/30 border-t-secondary animate-spin"></div>
-        
-        {/* Inner spinner (opposite direction) */}
-        <div className="absolute inset-2 rounded-full border-4 border-primary/30 border-b-primary animate-spin-slow"></div>
+        <div className="absolute inset-2 rounded-full border-4 border-primary/30 border-b-primary animate-spin" style={{ animationDirection: 'reverse' }}></div>
       </div>
       
       {/* Message */}
