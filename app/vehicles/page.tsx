@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { setSingleVehicle, setVehicle } from '@/redux/slice/vehicleSlice';
 import { Metadata } from 'next';
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: 'Browse Available Vehicles for Rent | Cars, Trucks, Tractors, Auto Rickshaw Near You',
   description: 'Browse and book from thousands of vehicles available for rent. Find cars, trucks, tractors, auto rickshaw, bolero, commercial vehicles near you. Instant booking with verified owners.',
   keywords: [

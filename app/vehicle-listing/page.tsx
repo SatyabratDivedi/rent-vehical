@@ -39,7 +39,7 @@ declare global {
   }
 }
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: 'List Your Vehicle for Rent | Rent Vehicle Platform - Earn Money from Your Car, Truck, Tractor',
   description: 'List your vehicle for rent and start earning money. Post cars, trucks, tractors, auto rickshaw, bolero, commercial vehicles on our platform. Free registration, instant visibility to thousands of renters.',
   keywords: [

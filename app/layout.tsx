@@ -125,8 +125,6 @@ export const metadata: Metadata = {
   verification: {
     google: 'FlZilU8Lt7Vy0V_YT3M-HgNHdRfUQH995G12lTvLe4s',
     yandex: 'd8e94aadd202e0f3',
-    yahoo: 'your-yahoo-verification-code',
-    bing: '53129DA3A280B6C17378E7B8B6D2D35F',
   },
 };
 
