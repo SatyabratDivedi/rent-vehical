@@ -126,9 +126,9 @@ export default function Navbar() {
           )}
         </div>
 
-        <div className='fixed z-50 bottom-2 right-2 bg-foreground rounded-full h-7 w-7 flex items-center justify-center'>
+        {/* <div className='fixed z-50 bottom-2 right-2 bg-foreground rounded-full h-7 w-7 flex items-center justify-center'>
           <ThemeToggle />
-        </div>
+        </div> */}
       </nav>
     </div>
   );

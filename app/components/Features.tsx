@@ -15,24 +15,6 @@ const features = [
 	},
 	{
 		id: 3,
-		title: '24/7 Support',
-		description: 'Round-the-clock customer support for all your needs',
-		icon: '🕒',
-	},
-	{
-		id: 4,
-		title: 'Flexible Rentals',
-		description: 'Rent by hour, day, week, or month - you choose',
-		icon: '📅',
-	},
-	{
-		id: 5,
-		title: 'Insurance Coverage',
-		description: 'All rentals come with basic insurance coverage',
-		icon: '🛡️',
-	},
-	{
-		id: 6,
 		title: 'Easy Booking',
 		description: 'Simple and quick booking process in just few clicks',
 		icon: '📱',
@@ -41,24 +23,51 @@ const features = [
 
 const Features = () => {
 	return (
-		<div className="container mx-auto py-16 px-5">
-			<h2 className="text-3xl font-bold text-center mb-12">Why Choose Us</h2>
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-				{features.map((feature) => (
-					<div
-						key={feature.id}
-						className="group 
-						bg-white/10 backdrop-blur-lg rounded-3xl p-6 
-						border border-white/20 transition-all duration-300 
-						shadow-2xl"
-					>
-						<div className="text-4xl mb-4">{feature.icon}</div>
-						<h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-						<p className="text-gray-500">{feature.description}</p>
-					</div>
-				))}
+		<section className="py-12 sm:py-16 lg:py-20 dark:bg-gray-900">
+			<div className="container mx-auto px-4 sm:px-6">
+				{/* Mobile-Optimized Header */}
+				<div className="text-center mb-12 sm:mb-16">
+					<h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
+						Why Choose Us
+					</h2>
+					<p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-4">
+						Experience the difference with our premium vehicle rental service
+					</p>
+				</div>
+
+				{/* Mobile-Optimized Features Grid */}
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+					{features.map((feature) => (
+						<div
+							key={feature.id}
+							className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 sm:p-8 hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700"
+						>
+							{/* Mobile-Optimized Icon */}
+							<div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#428d42]/10 rounded-lg flex items-center justify-center mb-4 sm:mb-6 hover:bg-[#428d42]/20 transition-colors duration-300">
+								<span className="text-xl sm:text-2xl">
+									{feature.icon}
+								</span>
+							</div>
+							
+							{/* Mobile-Optimized Content */}
+							<h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
+								{feature.title}
+							</h3>
+							<p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+								{feature.description}
+							</p>
+						</div>
+					))}
+				</div>
+
+				{/* Mobile-Optimized Bottom Text */}
+				<div className="text-center mt-12 sm:mt-16">
+					<p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">
+						Trusted by thousands of customers across India
+					</p>
+				</div>
 			</div>
-		</div>
+		</section>
 	);
 };
 

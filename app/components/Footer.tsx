@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="bg-white/5 backdrop-blur-lg border-t border-white/20">
       <div className="container mx-auto px-5 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-center justify-center">
           <div>
             <h3 className="text-xl font-bold mb-4">Rent Vehicle</h3>
             <p className="text-gray-500">
@@ -16,29 +16,29 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link href="/about" className="text-gray-500 hover:text-primary">About Us</Link></li>
-              <li><Link href="/vehicles" className="text-gray-500 hover:text-primary">Browse Vehicles</Link></li>
-              <li><Link href="/list-vehicle" className="text-gray-500 hover:text-primary">List Your Vehicle</Link></li>
-              <li><Link href="/contact" className="text-gray-500 hover:text-primary">Contact Us</Link></li>
+              <li><Link href="/about" className="text-gray-500 hover:text-blue-600">About Us</Link></li>
+              <li><Link href="/vehicles" className="text-gray-500 hover:text-blue-600">Browse Vehicles</Link></li>
+              <li><Link href="/list-vehicle" className="text-gray-500 hover:text-blue-600">List Your Vehicle</Link></li>
+              <li><Link href="/contact" className="text-gray-500 hover:text-blue-600">Contact Us</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-xl font-bold mb-4">Vehicle Types</h3>
             <ul className="space-y-2">
-              <li><Link href="/vehicles/pickup" className="text-gray-500 hover:text-primary">Pickup Trucks</Link></li>
-              <li><Link href="/vehicles/auto" className="text-gray-500 hover:text-primary">Auto Rickshaws</Link></li>
-              <li><Link href="/vehicles/tractor" className="text-gray-500 hover:text-primary">Tractors</Link></li>
-              <li><Link href="/vehicles/utility" className="text-gray-500 hover:text-primary">Utility Vehicles</Link></li>
+              <li><Link href="/" className="text-gray-500 hover:text-blue-600">Pickup Trucks</Link></li>
+              <li><Link href="/" className="text-gray-500 hover:text-blue-600">Auto Rickshaws</Link></li>
+              <li><Link href="/" className="text-gray-500 hover:text-blue-600">Tractors</Link></li>
+              <li><Link href="/" className="text-gray-500 hover:text-blue-600">Utility Vehicles</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-xl font-bold mb-4">Contact Info</h3>
-            <ul className="space-y-2 text-gray-500">
-              <li>📞 +91 1234567890</li>
-              <li>📧 support@rentvehicle.com</li>
-              <li>📍 123 Main Street, Mumbai</li>
+            <ul className="space-y-2 flex flex-col text-gray-500">
+              <a href="tel:+918318207464">📞 +91 8318207464</a>
+              <a href="mailto:support@rentvehicle.com">📧 contact@rentvehicle.com</a>
+              <li>📍 Uttar Pradesh, India</li>
             </ul>
           </div>
         </div>

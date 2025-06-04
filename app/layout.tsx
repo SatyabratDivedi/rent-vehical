@@ -366,7 +366,7 @@ export default function RootLayout({
       <body className={`${firaCode.variable} ${spaceMono.variable} ${sueEllenFrancisco.variable} antialiased`}>
         <ReduxProvider>
           <AuthCheck>
-            <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
+            <ThemeProvider attribute='class' defaultTheme='light' enableSystem>
               <Toaster reverseOrder={false} />
               <Navbar />
               <Providers>{children}</Providers>
