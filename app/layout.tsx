@@ -9,6 +9,7 @@ import { ReduxProvider } from './providers/ReduxProvider';
 import AuthCheck from './components/AuthCheck';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import Script from 'next/script';
 
 const firaCode = Fira_Code({
   subsets: ['latin'],
@@ -301,10 +302,22 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <head>
+        <Script async src='https://www.googletagmanager.com/gtag/js?id=G-9G9YWGTTE8' />
+        <Script id='google-analytics'>
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-9G9YWGTTE8');
+          `}
+        </Script>
+
+        
+
         <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <meta name="google-site-verification" content="FlZilU8Lt7Vy0V_YT3M-HgNHdRfUQH995G12lTvLe4s" />
-        <meta name="yandex-verification" content="d8e94aadd202e0f3" />
-        <meta name="msvalidate.01" content="53129DA3A280B6C17378E7B8B6D2D35F" />
+        <meta name='google-site-verification' content='FlZilU8Lt7Vy0V_YT3M-HgNHdRfUQH995G12lTvLe4s' />
+        <meta name='yandex-verification' content='d8e94aadd202e0f3' />
+        <meta name='msvalidate.01' content='53129DA3A280B6C17378E7B8B6D2D35F' />
         <link rel='canonical' href='https://www.rentvehical.com' />
 
         {/* Additional SEO Meta Tags */}
