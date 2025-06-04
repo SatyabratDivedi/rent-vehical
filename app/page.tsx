@@ -6,6 +6,15 @@ import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Rent Vehicle Online | Book Cars, Trucks, Tractors & Auto Near Me | Vehicle Rental Platform',
+  description: 'Find and rent vehicles near you - cars, trucks, tractors, bolero, auto rickshaw, commercial vehicles. Instant booking, verified owners, competitive prices. No hidden fees, just convenience.',
+  alternates: {
+    canonical: 'https://www.rentvehical.com',
+  },
+};
 
 export default function Home() {
   return (

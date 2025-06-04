@@ -7,6 +7,56 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { setSingleVehicle, setVehicle } from '@/redux/slice/vehicleSlice';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Browse Available Vehicles for Rent | Cars, Trucks, Tractors, Auto Rickshaw Near You',
+  description: 'Browse and book from thousands of vehicles available for rent. Find cars, trucks, tractors, auto rickshaw, bolero, commercial vehicles near you. Instant booking with verified owners.',
+  keywords: [
+    'browse vehicles for rent',
+    'available vehicles near me',
+    'rent vehicles online',
+    'book vehicles instantly',
+    'vehicles for hire',
+    'rental vehicles marketplace',
+    'find rental cars',
+    'truck rentals available',
+    'tractor rentals near me',
+    'auto rickshaw booking',
+    'commercial vehicles for rent',
+    'verified vehicle owners',
+    'instant vehicle booking',
+    'vehicle rental catalog',
+    'rent vehicle near me',
+    'vehicle rental search',
+    'book car online',
+    'hire vehicle instantly',
+    'vehicle rental directory',
+    'rental vehicle listings',
+  ],
+  openGraph: {
+    title: 'Browse Available Vehicles for Rent | Find Cars, Trucks, Tractors Near You',
+    description: 'Browse thousands of vehicles available for rent. Find and book cars, trucks, tractors, auto rickshaw near you with instant confirmation.',
+    type: 'website',
+    images: [
+      {
+        url: '/vehicles-browse-og.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Browse vehicles for rent - cars, trucks, tractors available',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Browse Available Vehicles for Rent | Cars, Trucks, Tractors',
+    description: 'Find and book from thousands of vehicles available for rent near you. Instant booking with verified owners.',
+    images: ['/vehicles-browse-og.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.rentvehical.com/vehicles',
+  },
+};
 
 export interface Vehicle {
   id: string;

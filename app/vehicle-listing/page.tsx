@@ -1,5 +1,6 @@
 'use client';
 
+import { Metadata } from 'next';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
@@ -37,6 +38,55 @@ declare global {
     APILoader: any;
   }
 }
+
+export const metadata: Metadata = {
+  title: 'List Your Vehicle for Rent | Rent Vehicle Platform - Earn Money from Your Car, Truck, Tractor',
+  description: 'List your vehicle for rent and start earning money. Post cars, trucks, tractors, auto rickshaw, bolero, commercial vehicles on our platform. Free registration, instant visibility to thousands of renters.',
+  keywords: [
+    'list vehicle for rent',
+    'rent out my car',
+    'earn from vehicle',
+    'vehicle rental income',
+    'list car for rental',
+    'rent my truck',
+    'vehicle sharing platform',
+    'post vehicle for rent',
+    'vehicle rental business',
+    'lease my vehicle',
+    'car rental income',
+    'truck rental income',
+    'tractor rental income',
+    'vehicle rental marketplace',
+    'rent out vehicle online',
+    'vehicle rental registration',
+    'vehicle listing platform',
+    'earn money from car',
+    'vehicle rental owner',
+    'rental vehicle listing',
+  ],
+  openGraph: {
+    title: 'List Your Vehicle for Rent | Start Earning Today',
+    description: 'List your vehicle for rent and start earning money. Free registration, instant visibility to thousands of renters.',
+    type: 'website',
+    images: [
+      {
+        url: '/vehicle-listing-og.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'List your vehicle for rent - cars, trucks, tractors',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'List Your Vehicle for Rent | Start Earning Today',
+    description: 'List your vehicle for rent and start earning money. Free registration with instant visibility.',
+    images: ['/vehicle-listing-og.jpg'],
+  },
+  alternates: {
+    canonical: 'https://www.rentvehical.com/vehicle-listing',
+  },
+};
 
 export default function VehiclePage() {
   const { theme } = useTheme();

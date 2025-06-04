@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rent Vehicle Platform - Latest Vehicle Listings</title>
+    <description>Latest vehicle rental listings including cars, trucks, tractors, auto rickshaw, and commercial vehicles</description>
+    <link>https://www.rentvehical.com</link>
+    <atom:link href="https://www.rentvehical.com/rss.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <copyright>© 2024 Rent Vehicle Platform</copyright>
+    <managingEditor>contact@rent-vehicle.vercel.app (Rent Vehicle Platform)</managingEditor>
+    <webMaster>webmaster@rent-vehicle.vercel.app (Rent Vehicle Platform)</webMaster>
+    <lastBuildDate>Mon, 15 Jan 2024 00:00:00 +0000</lastBuildDate>
+    <category>Transportation</category>
+    <category>Vehicle Rental</category>
+    <category>Travel</category>
+    <ttl>60</ttl>
+    <image>
+      <url>https://www.rentvehical.com/logo-min.png</url>
+      <title>Rent Vehicle Platform</title>
+      <link>https://www.rentvehical.com</link>
+      <width>144</width>
+      <height>144</height>
+    </image>
+    
+    <item>
+      <title>New Vehicle Listings Available</title>
+      <description>Discover the latest vehicle rental options including cars, trucks, tractors, and commercial vehicles available for rent.</description>
+      <link>https://www.rentvehical.com/vehicles</link>
+      <guid>https://www.rentvehical.com/vehicles</guid>
+      <pubDate>Mon, 15 Jan 2024 00:00:00 +0000</pubDate>
+      <category>Vehicle Listings</category>
+    </item>
+    
+    <item>
+      <title>List Your Vehicle - Start Earning Today</title>
+      <description>Join our platform and start earning by listing your vehicle for rental. Easy registration and competitive pricing.</description>
+      <link>https://www.rentvehical.com/vehicle-listing</link>
+      <guid>https://www.rentvehical.com/vehicle-listing</guid>
+      <pubDate>Mon, 15 Jan 2024 00:00:00 +0000</pubDate>
+      <category>Vehicle Listing</category>
+    </item>
+  </channel>
+</rss>
