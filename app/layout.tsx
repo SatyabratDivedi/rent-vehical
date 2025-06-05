@@ -10,6 +10,7 @@ import AuthCheck from './components/AuthCheck';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import Script from 'next/script';
+import NavigationSection from './components/NavigationSection';
 
 const firaCode = Fira_Code({
   subsets: ['latin'],
@@ -366,9 +367,9 @@ export default function RootLayout({
       <body className={`${firaCode.variable} ${spaceMono.variable} ${sueEllenFrancisco.variable} antialiased`}>
         <ReduxProvider>
           <AuthCheck>
+            <NavigationSection/>
             <ThemeProvider attribute='class' defaultTheme='light' enableSystem>
               <Toaster reverseOrder={false} />
-              <Navbar />
               <Providers>{children}</Providers>
             </ThemeProvider>
           </AuthCheck>

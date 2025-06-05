@@ -563,13 +563,13 @@ export default function VehiclePage() {
 
   return (
     <ProtectedRoute>
-      <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
-        <button onClick={() => router.push('/')} className='flex fixed top-1 left-4 px-2 py-1 bg-slate-300 rounded-md group items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 mb-4'>
+      <div className='min-h-screen dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+        {/* <button onClick={() => router.push('/')} className='flex fixed top-1 left-4 px-2 py-1 bg-slate-300 rounded-md group items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 mb-4'>
           <svg className='w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
           </svg>
           Back to Home
-        </button>
+        </button> */}
         <div className='max-w-2xl mx-auto'>
           <div className='bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden'>
             <div className='bg-gradient-to-r from-blue-600 to-indigo-600 p-6'>

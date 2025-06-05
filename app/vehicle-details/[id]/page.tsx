@@ -249,7 +249,7 @@ const VehicleDetailsPage = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+      <div className='min-h-screen  dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
         <div className='max-w-6xl mx-auto'>
           <VehicleDetailsSkeleton />
         </div>
@@ -259,7 +259,7 @@ const VehicleDetailsPage = () => {
 
   if (error) {
     return (
-      <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+      <div className='min-h-screen dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
         <div className='max-w-6xl mx-auto'>
           <div className='text-center py-12'>
             <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 max-w-md mx-auto'>
@@ -287,7 +287,7 @@ const VehicleDetailsPage = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+    <div className='min-h-screen  dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
       <div className='max-w-6xl mx-auto'>
         {/* Header with back button */}
         <div className='mb-8'>

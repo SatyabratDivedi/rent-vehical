@@ -7,6 +7,7 @@ import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import NavigationSection from './components/NavigationSection';
 
 export const metadata: Metadata = {
   title: 'Rent Vehicle Online | Book Cars, Trucks, Tractors & Auto Near Me | Vehicle Rental Platform',

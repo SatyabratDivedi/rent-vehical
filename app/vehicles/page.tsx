@@ -126,9 +126,9 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
   };
 
   return (
-    <div className='group bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-200 dark:border-gray-700'>
+    <div className='group dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-200 dark:border-gray-700'>
       {/* Image section with navigation */}
-      <div className='relative h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden'>
+      <div className='relative h-48 dark:bg-gray-700 overflow-hidden'>
         {vehicle.images.length > 0 && !imageError ? (
           <>
             <Image src={vehicle.images[currentImageIndex]} alt={vehicle.title} fill className='object-cover transition-transform duration-300 group-hover:scale-105' onError={handleImageError} />
@@ -181,7 +181,7 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
       <div className='p-6 space-y-4'>
         <div>
           <h3 className='text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-1'>{vehicle.title}</h3>
-          <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-3'>{vehicle.description}</p>
+          {/* <p className='text-gray-600 dark:text-gray-300 text-sm line-clamp-3'>{vehicle.description}</p> */}
         </div>
         {/* Vehicle info */}
         <div className='flex items-center justify-between text-sm'>
@@ -331,19 +331,19 @@ const VehicleListPage = () => {
   };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
-      <button onClick={() => router.push('/')} className='flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 mb-4'>
+    <div className=' dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+      {/* <button onClick={() => router.push('/')} className='flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 mb-4'>
         <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
           <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
         </svg>
         Back to Home
-      </button>
+      </button> */}
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
-        <div className='text-center mb-12'>
+        {/* <div className='text-center mb-12'>
           <h1 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4'>Vehicle Collection</h1>
           <p className='text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto'>Explore our diverse collection of vehicles available for rent. Find the perfect ride for your next adventure.</p>
-        </div>
+        </div> */}
         {/* Loading state */}
         {loading && (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>

@@ -59,11 +59,11 @@ export default function SignIn() {
   };
 
   return (
-    <div className='h-[100vh] flex items-center justify-center bg-background'>
-      <Link href='/' className='absolute top-6 left-6 flex items-center text-gray-400 hover:text-primary transition-colors group'>
+    <div className='h-[80vh] flex items-center justify-center bg-background'>
+      {/* <Link href='/' className='absolute top-6 left-6 flex items-center text-gray-400 hover:text-primary transition-colors group'>
         <FaArrowLeft className='mr-2' />
         <span className='group-hover:underline'>Back to Home</span>
-      </Link>
+      </Link> */}
       <div className='bg-white/10 backdrop-blur-lg p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20'>
         <h2 className='text-2xl font-bold mb-6 text-center'>Welcome Back</h2>
 
@@ -90,7 +90,7 @@ export default function SignIn() {
                 setNumber(e.target.value);
                 setError('');
               }}
-              className='w-full px-4 py-2 pt-5 rounded-lg border bg-white/5 backdrop-blur-sm border-white/10 focus:outline-none focus:border-primary peer'
+              className='w-full px-4 py-2 pt-5 rounded-lg border bg-white/5 backdrop-blur-sm border-white/10 focus:outline-none focus:border-blue-500 peer'
             />
             <label htmlFor='tel' className='absolute text-sm text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4'>
               Mobile Number
@@ -107,7 +107,7 @@ export default function SignIn() {
                 setPassword(e.target.value);
                 setError('');
               }}
-              className='w-full px-4 py-2 pt-5 pr-10 rounded-lg border bg-white/5 backdrop-blur-sm border-white/10 focus:outline-none focus:border-primary peer'
+              className='w-full px-4 py-2 pt-5 pr-10 rounded-lg border bg-white/5 backdrop-blur-sm border-white/10 focus:outline-none focus:border-blue-500 peer'
             />
             <label htmlFor='password' className='absolute text-sm text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4'>
               Password
@@ -124,12 +124,12 @@ export default function SignIn() {
                 Remember me
               </label>
             </div>
-            <Link href='/handler/forgot-password' className='text-primary hover:underline'>
+            <Link href='/handler/forgot-password' className='text-black hover:underline'>
               Forgot password?
             </Link>
           </div>
 
-          <button type='submit' className='w-full bg-primary text-black font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed' disabled={isLoading}>
+          <button type='submit' className='w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed' disabled={isLoading}>
             {isLoading ? (
               <div className='flex justify-center items-center'>
                 <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
@@ -145,22 +145,22 @@ export default function SignIn() {
             <div className='absolute inset-0 flex items-center'>
               <div className='w-full border-t border-white/20'></div>
             </div>
-            <div className='relative flex justify-center text-sm'>
+            <div className='relative justify-center text-sm hidden'>
               <span className='px-2 bg-background text-gray-500'>Or continue with</span>
             </div>
           </div>
 
-          <div className='mt-6 grid grid-cols-2 gap-4'>
+          <div className='mt-6 grid-cols-2 gap-4 hidden'>
             <button
               // onClick={signInWithGoogle}
-              className='flex items-center justify-center px-4 py-2 border border-white/20 rounded-lg hover:bg-white/5 transition-colors'
+              className='flex items-center justify-center px-4 py-2 border border-blue-600 rounded-lg hover:bg-white/5 transition-colors'
             >
               <FaGoogle className='mr-2' />
               Google
             </button>
             <button
               // onClick={signInWithGithub}
-              className='flex items-center justify-center px-4 py-2 border border-white/20 rounded-lg hover:bg-white/5 transition-colors'
+              className='flex items-center justify-center px-4 py-2 border border-blue-600 rounded-lg hover:bg-white/5 transition-colors'
             >
               <FaGithub className='mr-2' />
               GitHub
@@ -170,7 +170,7 @@ export default function SignIn() {
 
         <p className='mt-8 text-center text-sm text-gray-500'>
           Don&apos;t have an account?{' '}
-          <Link href='/handler/sign-up' className='text-primary hover:underline'>
+          <Link href='/handler/sign-up' className='text-blue-600 hover:underline'>
             Sign up
           </Link>
         </p>
