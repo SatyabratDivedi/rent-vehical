@@ -37,7 +37,7 @@ const Footer = () => {
             <h3 className="text-xl font-bold mb-4">Contact Info</h3>
             <ul className="space-y-2 flex flex-col text-gray-500">
               <a href="tel:+918318207464">📞 +91 8318207464</a>
-              <a href="mailto:support@rentvehicle.com">📧 contact@rentvehicle.com</a>
+              <a href="mailto:support@rentvehical.com">📧 contact@rentvehical.com</a>
               <li>📍 Uttar Pradesh, India</li>
             </ul>
           </div>
