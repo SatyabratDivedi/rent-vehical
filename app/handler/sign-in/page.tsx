@@ -9,6 +9,7 @@ export default function SignIn() {
   const [number, setNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isRemembered, setIsRemembered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function SignIn() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ mobile: number, password }),
+        body: JSON.stringify({ mobile: number, password, remember: isRemembered }),
       });
 
       const data = await response.json();
@@ -118,7 +119,7 @@ export default function SignIn() {
 
           <div className='flex items-center justify-between text-sm'>
             <div className='flex items-center'>
-              <input id='remember-me' name='remember-me' type='checkbox' className='h-4 w-4 rounded border-white/20 bg-white/5' />
+              <input onClick={() => setIsRemembered(!isRemembered)} id='remember-me' name='remember-me' type='checkbox' className='h-4 w-4 rounded border-white/20 bg-white/5' />
               <label htmlFor='remember-me' className='ml-2 block text-gray-500'>
                 Remember me
               </label>
