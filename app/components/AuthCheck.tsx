@@ -36,8 +36,9 @@ const AuthCheck = ({ children }: { children: React.ReactNode }) => {
         if (data.userDetails) {
           dispatch(setUser(data.userDetails));
           localStorage.setItem('user', JSON.stringify(data.userDetails));
+          localStorage.setItem('token', token);
         }
-      }else{
+      } else {
         console.error('Failed to fetch user details:', data.message);
         dispatch(setUser({ id: '', email: '', name: 'Guest' }));
       }

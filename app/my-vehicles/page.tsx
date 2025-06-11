@@ -48,15 +48,29 @@ const VehiclesPage = () => {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  const deleteHandler =async (id:string)=>{
+  const deleteHandler = async (id: string) => {
+    console.log(`Deleting vehicle with ID: ${id}`);
+    
+    // Show confirmation dialog
+    if (!window.confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
+      return;
+    }
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/${id}`, {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please login to delete vehicles');
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/delete-vehicle/${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
+      
       const data = await response.json();
 
       if (!response.ok) {
@@ -65,10 +79,21 @@ const VehiclesPage = () => {
 
       // Remove the deleted vehicle from the state
       setVehiclesData((prev) => prev.filter((vehicle) => vehicle.id !== id));
+      
+      // Show success message with additional info if some images failed to delete
+      if (data.warning) {
+        alert(`Vehicle deleted successfully, but ${data.warning}. Failed images: ${data.failedImages?.length || 0}`);
+      } else {
+        alert('Vehicle deleted successfully!');
+      }
+      
+      console.log('Vehicle deletion result:', data);
+      
     } catch (error) {
-      console.log(error)
+      console.error('Error deleting vehicle:', error);
+      alert(`Failed to delete vehicle: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-   }
+  };
 
   return (
     <>
@@ -204,10 +229,7 @@ const VehiclesPage = () => {
                           >
                             Edit
                           </button>
-                          <button
-                            className='px-3 py-1.5 bg-[#d9534f] text-white rounded-lg hover:bg-[#c9302c] transition-colors duration-200 text-sm font-medium'
-                            onClick={() => deleteHandler(vehicle.id)}
-                          >
+                          <button className='px-3 py-1.5 bg-[#d9534f] text-white rounded-lg hover:bg-[#c9302c] transition-colors duration-200 text-sm font-medium' onClick={() => deleteHandler(vehicle.id)}>
                             Delete
                           </button>
                           {!vehicle.isPublished && (
