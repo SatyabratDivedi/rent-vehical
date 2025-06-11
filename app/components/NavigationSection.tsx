@@ -34,7 +34,7 @@ const NavigationSection = () => {
 
   const userNavItems: NavigationItem[] = [
     { icon: HiUser, title: 'Profile', link: '/profile' },
-    { icon: HiHeart, title: 'Saved', link: '/saved-properties' },
+    { icon: HiHeart, title: 'My Vehicles', link: '/my-vehicles' },
     { icon: HiPlus, title: 'Add Vehicle', link: '/vehicle-listing', badge: 'Free' },
   ];
 
@@ -95,8 +95,8 @@ const NavigationSection = () => {
           <div className='flex items-center justify-between h-16'>
             {/* Logo */}
             <Link href='/' className='flex items-center space-x-2 group'>
-              <div className='relative w-10 h-10 rounded-full overflow-hidden'>
-                <Image src='/logo-min.png' alt='Rent Vehicle Logo' fill className='object-cover group-hover:scale-110 transition-transform duration-200' />
+              <div className='relative w-12 h-12 rounded-full overflow-hidden'>
+                <img src='/logo-min.png'  alt='Rent Vehicle Logo' fill="true" className='object-cover group-hover:scale-110 transition-transform duration-200' />
               </div>
               <span className='hidden sm:block text-xl font-bold text-gray-900'>
                 Rent<span className='text-blue-600'>Vehicle</span>
@@ -135,11 +135,11 @@ const NavigationSection = () => {
                 </div>
               ) : (
                 <div className='hidden lg:flex items-center space-x-3'>
-                  <span className='text-sm text-gray-700'>Welcome, {userDetails.name}</span>
-                  <button onClick={handleLogout} className='inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors duration-200'>
+                  <span className='text-sm text-gray-700'>Welcome, {userDetails.name.split(' ')[0]}</span>
+                  {/* <button onClick={handleLogout} className='inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors duration-200'>
                     <HiLogout className='w-4 h-4 mr-2' />
                     Logout
-                  </button>
+                  </button> */}
                 </div>
               )}
 
@@ -180,7 +180,7 @@ const NavigationSection = () => {
                       </div>
                       <div>
                         <h3 className=' text-sm lg:text-base font-medium text-gray-900'>{userDetails.name}</h3>
-                        <p className=' text-xs lg:text-sm text-gray-500'>{userDetails.email}</p>
+                        <p className=' text-xs text-gray-500'>{userDetails.email}</p>
                       </div>
                     </div>
                   </motion.div>

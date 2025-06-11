@@ -31,11 +31,11 @@ const AuthCheck = ({ children }: { children: React.ReactNode }) => {
       });
 
       const data = await response.json();
-      console.log('User details:', data);
 
       if (response.ok) {
-        dispatch(setUser(data.userDetails));
         if (data.userDetails) {
+          dispatch(setUser(data.userDetails));
+          localStorage.setItem('user', JSON.stringify(data.userDetails));
         }
       }else{
         console.error('Failed to fetch user details:', data.message);

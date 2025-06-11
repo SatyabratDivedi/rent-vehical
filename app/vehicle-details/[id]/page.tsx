@@ -208,7 +208,7 @@ const VehicleDetailsPage = () => {
       setIsFromCache(false);
       setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/${vehicleId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/vehicle_id/${vehicleId}`);
 
       if (!response.ok) {
         if (response.status === 404) {
