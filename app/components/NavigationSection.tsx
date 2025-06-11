@@ -96,7 +96,7 @@ const NavigationSection = () => {
             {/* Logo */}
             <Link href='/' className='flex items-center space-x-2 group'>
               <div className='relative w-12 h-12 rounded-full overflow-hidden'>
-                <img src='/logo-min.png'  alt='Rent Vehicle Logo' fill="true" className='object-cover group-hover:scale-110 transition-transform duration-200' />
+                <img src='/logo-min.png'  alt='Rent Vehicle Logo' className='object-cover group-hover:scale-110 transition-transform duration-200' />
               </div>
               <span className='hidden sm:block text-xl font-bold text-gray-900'>
                 Rent<span className='text-blue-600'>Vehicle</span>

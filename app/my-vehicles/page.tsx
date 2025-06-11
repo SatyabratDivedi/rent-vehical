@@ -2,9 +2,8 @@
 import { RootState } from '@/redux/store';
 import React, { useEffect, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
+import Image from 'next/image';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { VehicleCardSkeleton } from '../vehicles/page';
-import { div } from 'framer-motion/client';
 
 interface Vehicle {
   id: string;
@@ -20,14 +19,37 @@ interface Vehicle {
   updatedAt: string;
 }
 
+const VehicleCardSkeleton = () => (
+  <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden animate-pulse'>
+    <div className='h-48 bg-gray-300 dark:bg-gray-700'></div>
+    <div className='p-6 space-y-4'>
+      <div className='h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4'></div>
+      <div className='h-3 bg-gray-300 dark:bg-gray-700 rounded w-full'></div>
+      <div className='h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3'></div>
+      <div className='flex justify-between items-center'>
+        <div className='h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/4'></div>
+        <div className='h-8 bg-gray-300 dark:bg-gray-700 rounded w-20'></div>
+      </div>
+    </div>
+  </div>
+);
+
 const VehiclesPage = () => {
   const user = useSelector((state: RootState) => state.user.value);
   const [loading, setLoading] = useState(true);
-  const userFromLocalStorage = localStorage.getItem('user');
-  const userId = userFromLocalStorage ? JSON.parse(userFromLocalStorage)?.id : user?.id;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const [vehiclesData, setVehiclesData] = React.useState<Vehicle[]>([]);
-  const fetchVehicles = useCallback(async () => {
+  // Handle client-side localStorage access
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userFromLocalStorage = localStorage.getItem('user');
+      const id = userFromLocalStorage ? JSON.parse(userFromLocalStorage)?.id : user?.id;
+      setUserId(id);
+    }
+  }, [user]);
+
+  const [vehiclesData, setVehiclesData] = React.useState<Vehicle[]>([]);  const fetchVehicles = useCallback(async () => {
     try {
       if (!userId) {
         console.error('User ID is not available');
@@ -42,24 +64,24 @@ const VehiclesPage = () => {
       setLoading(false);
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   }, [userId]);
   useEffect(() => {
     fetchVehicles();
-  }, [fetchVehicles]);
-
-  const deleteHandler = async (id: string) => {
-    console.log(`Deleting vehicle with ID: ${id}`);
+  }, [fetchVehicles]);  const deleteHandler = async (id: string) => {
     
     // Show confirmation dialog
     if (!window.confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
       return;
     }
 
+    setDeletingId(id);
+
     try {
-      const token = localStorage.getItem('token');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (!token) {
-        alert('Please login to delete vehicles');
+        setDeletingId(null);
         return;
       }
 
@@ -77,21 +99,12 @@ const VehiclesPage = () => {
         throw new Error(data.message || 'Failed to delete vehicle');
       }
 
-      // Remove the deleted vehicle from the state
       setVehiclesData((prev) => prev.filter((vehicle) => vehicle.id !== id));
-      
-      // Show success message with additional info if some images failed to delete
-      if (data.warning) {
-        alert(`Vehicle deleted successfully, but ${data.warning}. Failed images: ${data.failedImages?.length || 0}`);
-      } else {
-        alert('Vehicle deleted successfully!');
-      }
-      
-      console.log('Vehicle deletion result:', data);
       
     } catch (error) {
       console.error('Error deleting vehicle:', error);
-      alert(`Failed to delete vehicle: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -166,9 +179,14 @@ const VehiclesPage = () => {
                 {vehiclesData.map((vehicle) => (
                   <div key={vehicle.id} className='bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow duration-300'>
                     {/* Vehicle Image */}
-                    <div className='h-48 bg-gray-200 dark:bg-gray-700 relative'>
-                      {vehicle.images && vehicle.images.length > 0 ? (
-                        <img src={vehicle.images[0]} alt={vehicle.title} className='w-full h-full object-cover' />
+                    <div className='h-48 bg-gray-200 dark:bg-gray-700 relative'>                      {vehicle.images && vehicle.images.length > 0 ? (
+                        <Image 
+                          src={vehicle.images[0]} 
+                          alt={vehicle.title}
+                          fill
+                          className='object-cover'
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
                       ) : (
                         <div className='absolute inset-0 flex items-center justify-center'>
                           <svg className='w-16 h-16 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -228,9 +246,26 @@ const VehiclesPage = () => {
                             }}
                           >
                             Edit
-                          </button>
-                          <button className='px-3 py-1.5 bg-[#d9534f] text-white rounded-lg hover:bg-[#c9302c] transition-colors duration-200 text-sm font-medium' onClick={() => deleteHandler(vehicle.id)}>
-                            Delete
+                          </button>                          <button 
+                            className={`px-3 py-1.5 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center gap-2 ${
+                              deletingId === vehicle.id 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-[#d9534f] hover:bg-[#c9302c]'
+                            }`}
+                            onClick={() => deleteHandler(vehicle.id)}
+                            disabled={deletingId === vehicle.id}
+                          >
+                            {deletingId === vehicle.id ? (
+                              <>
+                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Deleting...
+                              </>
+                            ) : (
+                              'Delete'
+                            )}
                           </button>
                           {!vehicle.isPublished && (
                             <button

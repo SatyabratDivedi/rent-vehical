@@ -75,7 +75,7 @@ export interface Vehicle {
 }
 
 // Loading skeleton component
-export const VehicleCardSkeleton = () => (
+const VehicleCardSkeleton = () => (
   <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden animate-pulse'>
     <div className='h-48 bg-gray-300 dark:bg-gray-700'></div>
     <div className='p-6 space-y-4'>
