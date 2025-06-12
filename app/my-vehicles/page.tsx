@@ -228,13 +228,21 @@ const VehiclesPage = () => {
                       )}
                       {/* Image Count Badge */}
                       {vehicle.images && vehicle.images.length > 1 && (
-                        <div className='absolute top-4 left-4'>
-                          <span className='px-2 py-1 text-xs font-medium rounded-full bg-black/60 text-white'>+{vehicle.images.length - 1} more</span>
+                        <div className='absolute top-2 left-2'>
+                          <span className='inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-black/70 text-white backdrop-blur-sm border border-white/20 shadow-lg'>
+                            <svg className='w-3 h-3' fill='currentColor' viewBox='0 0 20 20'>
+                              <path fillRule='evenodd' d='M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z' clipRule='evenodd' />
+                            </svg>
+                            <span className='tracking-tight'>+{vehicle.images.length - 1}</span>
+                          </span>
                         </div>
                       )}
                       {/* Status Badge */}
-                      <div className='absolute top-4 right-4'>
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${vehicle.isPublished ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'}`}>{vehicle.isPublished ? 'Published' : 'Draft'}</span>
+                      <div className='absolute top-2 right-2'>
+                        <div className={`inline-flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-lg shadow-lg backdrop-blur-xl border transition-all duration-300 ${vehicle.isPublished ? ' text-emerald-700 border-emerald-200/50 bg-emerald-50/95' : 'text-orange-700 border-orange-200/50 bg-orange-50/95'}`}>
+                          <div className={`w-2 h-2 rounded-full ${vehicle.isPublished ? 'bg-emerald-600 animate-pulse' : 'bg-orange-600'}`}></div>
+                          <span className='font-semibold tracking-tight'>{vehicle.isPublished ? 'LIVE' : 'DRAFT'}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -284,26 +292,42 @@ const VehiclesPage = () => {
                                   <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
                                   <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
                                 </svg>
-                                Deleting...
                               </>
                             ) : (
                               'Delete'
                             )}
                           </button>
                           {publishingToggleId === vehicle.id ? (
-                            <button
-                              className='px-3 py-1.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200 text-sm font-medium'
-                            >
-                              {vehicle.isPublished ? 'UnPublishing...' : 'Publishing...'}
+                            <button className='px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg transition-all duration-200 text-sm font-medium flex items-center gap-2 cursor-not-allowed opacity-80' disabled>
+                              <svg className='animate-spin h-4 w-4 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
+                                <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
+                                <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+                              </svg>
                             </button>
                           ) : (
                             <button
-                              className='px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium'
+                              className={`px-3 py-1.5 rounded-lg transition-all duration-200 text-sm font-medium transform hover:scale-105 ${
+                                vehicle.isPublished ? 'bg-[#fef9c3] hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-orange-500/25' : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-emerald-500/25'
+                              }`}
                               onClick={() => {
                                 publishToggle(vehicle.id);
                               }}
                             >
-                              {vehicle.isPublished ? 'Unpublish' : 'Publish'}
+                              {vehicle.isPublished ? (
+                                <span className='flex items-center gap-2'>
+                                  <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
+                                    <path fillRule='evenodd' d='M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z' clipRule='evenodd' />
+                                  </svg>
+                                  Unpublish
+                                </span>
+                              ) : (
+                                <span className='flex items-center gap-2'>
+                                  <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 20 20'>
+                                    <path fillRule='evenodd' d='M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 11-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z' clipRule='evenodd' />
+                                  </svg>
+                                  Publish
+                                </span>
+                              )}
                             </button>
                           )}
                         </div>
