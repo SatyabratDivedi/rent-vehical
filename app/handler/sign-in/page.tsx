@@ -4,6 +4,7 @@ import { FaGoogle, FaGithub, FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useAuth } from '@/app/hooks/useAuth';
 
 export default function SignIn() {
   const [number, setNumber] = useState('');
@@ -13,6 +14,7 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const {login} = useAuth();
 
   const onSubmit = async () => {
     setError('');
@@ -44,6 +46,7 @@ export default function SignIn() {
 
         if (data.success && data.token) {
           document.cookie = `token=${data.token}; path=/; max-age=604800; SameSite=Strict`;
+          login(data.userId, data.token);
           router.push('/');
         } else {
           throw new Error('Invalid response format');

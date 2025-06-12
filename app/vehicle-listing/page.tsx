@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Location {
   latitude: string;
@@ -510,7 +511,7 @@ export default function VehiclePage() {
       if (!response.ok) {
         throw new Error('Failed to upload vehicle');
       }
-
+      localStorage.removeItem('vehicles_cache');
       setIsSuccess(true);
 
       imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
@@ -530,8 +531,8 @@ export default function VehiclePage() {
               <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
             </svg>
           </div>
-          <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>Vehicle Uploaded Successfully!</h2>
-          <p className='text-gray-600 dark:text-gray-300 mb-6'>Your vehicle has been added to the platform. You can check it in your vehicle lists.</p>
+          <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>Vehicle Drafted Successfully!</h2>
+          <Link href='/my-vehicles' className='text-gray-600 dark:text-gray-300 mb-6'>Your vehicle has been added to the draft. You can live and edit it in your vehicle lists.</Link>
           <button
             onClick={() => {
               setIsSuccess(false);

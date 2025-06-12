@@ -126,7 +126,7 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
   };
 
   return (
-    <div className='group dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-200 dark:border-gray-700'>
+    <div onClick={handleViewDetails} className='group dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-gray-200 dark:border-gray-700 cursor-pointer'>
       {/* Image section with navigation */}
       <div className='relative h-48 dark:bg-gray-700 overflow-hidden'>
         {vehicle.images.length > 0 && !imageError ? (
@@ -163,18 +163,6 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
             </svg>
           </div>
         )}
-
-        {/* Owner badge */}
-        {vehicle.isOwner && (
-          <div className='absolute top-3 right-3'>
-            <span className='bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium'>Owner</span>
-          </div>
-        )}
-
-        {/* Published status */}
-        <div className='absolute top-3 left-3'>
-          <span className={`text-xs px-2 py-1 rounded-full font-medium ${vehicle.isPublished ? 'bg-blue-500 text-white' : 'bg-yellow-500 text-black'}`}>{vehicle.isPublished ? 'Published' : 'Draft'}</span>
-        </div>
       </div>
 
       {/* Content section */}
@@ -191,7 +179,7 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
             </svg>
             {vehicle.user.name}
           </div>
-          <div className='text-gray-500 dark:text-gray-400'>{formatDate(vehicle.createdAt)}</div>
+          {/* <div className='text-gray-500 dark:text-gray-400'>{formatDate(vehicle.createdAt)}</div> */}
         </div>
         {/* Images count */}
         {vehicle.images.length > 0 && (

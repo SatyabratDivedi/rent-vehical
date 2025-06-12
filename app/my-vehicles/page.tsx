@@ -1,9 +1,10 @@
 'use client';
-import { RootState } from '@/redux/store';
 import React, { useEffect, useCallback, useState } from 'react';
-import { useSelector } from 'react-redux';
 import Image from 'next/image';
 import ProtectedRoute from '../components/ProtectedRoute';
+import ConfirmationPopup from '../components/ConfirmationPopup';
+import { useAuth } from '../hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 interface Vehicle {
   id: string;
@@ -35,26 +36,19 @@ const VehicleCardSkeleton = () => (
 );
 
 const VehiclesPage = () => {
-  const user = useSelector((state: RootState) => state.user.value);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [publishingToggleId, setPublishingToggleId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
+  const { token, userId } = useAuth();
+  const router = useRouter();
 
-  // Handle client-side localStorage access
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const userFromLocalStorage = localStorage.getItem('user');
-      const id = userFromLocalStorage ? JSON.parse(userFromLocalStorage)?.id : user?.id;
-      setUserId(id);
-    }
-  }, [user]);
+  const [vehiclesData, setVehiclesData] = React.useState<Vehicle[]>([]);
 
-  const [vehiclesData, setVehiclesData] = React.useState<Vehicle[]>([]);  const fetchVehicles = useCallback(async () => {
+  const fetchVehicles = useCallback(async () => {
     try {
-      if (!userId) {
-        console.error('User ID is not available');
-        return;
-      }
+      if (!userId) return;
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/user_id/${userId}`);
       const data = await response.json();
       if (!response.ok) {
@@ -67,44 +61,84 @@ const VehiclesPage = () => {
       setLoading(false);
     }
   }, [userId]);
+
   useEffect(() => {
     fetchVehicles();
-  }, [fetchVehicles]);  const deleteHandler = async (id: string) => {
-    
-    // Show confirmation dialog
-    if (!window.confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
-      return;
-    }
+  }, [fetchVehicles]);
 
-    setDeletingId(id);
+  const deleteHandler = async (vehicle: Vehicle) => {
+    setVehicleToDelete(vehicle);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!vehicleToDelete) return;
+
+    setDeletingId(vehicleToDelete.id);
+    setShowDeleteConfirm(false);
 
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (!token) {
         setDeletingId(null);
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/delete-vehicle/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/delete-vehicle/${vehicleToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to delete vehicle');
       }
 
-      setVehiclesData((prev) => prev.filter((vehicle) => vehicle.id !== id));
-      
+      if (vehicleToDelete.isPublished) {
+        localStorage.removeItem('vehicles_cache');
+      }
+
+      setVehiclesData((prev) => prev.filter((vehicle) => vehicle.id !== vehicleToDelete.id));
     } catch (error) {
       console.error('Error deleting vehicle:', error);
     } finally {
       setDeletingId(null);
+      setVehicleToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setVehicleToDelete(null);
+  };
+
+  const publishToggle = async (vehicleId: string) => {
+    setPublishingToggleId(vehicleId);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/toggle-publish-vehicle/${vehicleId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to publish vehicle');
+      }
+
+      localStorage.removeItem('vehicles_cache');
+
+      setVehiclesData((prev) => prev.map((vehicle) => (vehicle.id === vehicleId ? { ...vehicle, isPublished: !vehicle.isPublished } : vehicle)));
+    } catch (error) {
+      console.error('Error publishing vehicle:', error);
+    } finally {
+      setPublishingToggleId(null);
     }
   };
 
@@ -117,11 +151,13 @@ const VehiclesPage = () => {
             <div className='flex flex-col md:flex-row justify-between items-center'>
               <div className=' text-center lg:text-start mb-5 lg:mb-0'>
                 <h1 className='text-3xl font-bold text-gray-900 dark:text-white mb-2'>My Vehicles </h1>
-                <p className='text-gray-600 dark:text-gray-300'>Manage your listed vehicles {vehiclesData.length}</p>
+                <p className='text-gray-600 dark:text-gray-300'>Manage your listed vehicles</p>
               </div>
-              <button className='px-6 py-3 bg-[#428d42] text-white rounded-lg hover:bg-[#357a35] transition-colors duration-200 font-medium'>+ Add New Vehicle</button>
+              <button onClick={() => router.push('/vehicle-listing')} className='px-6 py-3 bg-[#428d42] text-white rounded-lg hover:bg-[#357a35] transition-colors duration-200 font-medium'>
+                + Add New Vehicle
+              </button>
             </div>
-          </div>{' '}
+          </div>
           {/* Statistics Cards */}
           <div className='grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 mb-8'>
             <div className='bg-white dark:bg-gray-800 rounded-lg lg:rounded-xl p-2 sm:p-4 lg:p-6 shadow-lg border border-gray-200 dark:border-gray-700'>
@@ -179,14 +215,10 @@ const VehiclesPage = () => {
                 {vehiclesData.map((vehicle) => (
                   <div key={vehicle.id} className='bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-shadow duration-300'>
                     {/* Vehicle Image */}
-                    <div className='h-48 bg-gray-200 dark:bg-gray-700 relative'>                      {vehicle.images && vehicle.images.length > 0 ? (
-                        <Image 
-                          src={vehicle.images[0]} 
-                          alt={vehicle.title}
-                          fill
-                          className='object-cover'
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
+                    <div className='h-48 bg-gray-200 dark:bg-gray-700 relative'>
+                      {' '}
+                      {vehicle.images && vehicle.images.length > 0 ? (
+                        <Image src={vehicle.images[0]} alt={vehicle.title} fill className='object-cover' sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw' />
                       ) : (
                         <div className='absolute inset-0 flex items-center justify-center'>
                           <svg className='w-16 h-16 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -194,14 +226,12 @@ const VehiclesPage = () => {
                           </svg>
                         </div>
                       )}
-
                       {/* Image Count Badge */}
                       {vehicle.images && vehicle.images.length > 1 && (
                         <div className='absolute top-4 left-4'>
                           <span className='px-2 py-1 text-xs font-medium rounded-full bg-black/60 text-white'>+{vehicle.images.length - 1} more</span>
                         </div>
                       )}
-
                       {/* Status Badge */}
                       <div className='absolute top-4 right-4'>
                         <span className={`px-3 py-1 text-xs font-medium rounded-full ${vehicle.isPublished ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'}`}>{vehicle.isPublished ? 'Published' : 'Draft'}</span>
@@ -234,9 +264,9 @@ const VehiclesPage = () => {
                       </div>
 
                       <div className='flex justify-between items-center'>
-                        <div className='flex items-center space-x-2'>
+                        {/* <div className='flex items-center space-x-2'>
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${vehicle.isOwner ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'}`}>{vehicle.isOwner ? 'Owner' : 'Renter'}</span>
-                        </div>
+                        </div> */}
 
                         <div className='flex gap-2'>
                           <button
@@ -246,20 +276,13 @@ const VehiclesPage = () => {
                             }}
                           >
                             Edit
-                          </button>                          <button 
-                            className={`px-3 py-1.5 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center gap-2 ${
-                              deletingId === vehicle.id 
-                                ? 'bg-gray-400 cursor-not-allowed' 
-                                : 'bg-[#d9534f] hover:bg-[#c9302c]'
-                            }`}
-                            onClick={() => deleteHandler(vehicle.id)}
-                            disabled={deletingId === vehicle.id}
-                          >
+                          </button>
+                          <button className={`px-3 py-1.5 text-white rounded-lg transition-colors duration-200 text-sm font-medium flex items-center gap-2 ${deletingId === vehicle.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#d9534f] hover:bg-[#c9302c]'}`} onClick={() => deleteHandler(vehicle)} disabled={deletingId === vehicle.id}>
                             {deletingId === vehicle.id ? (
                               <>
-                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <svg className='animate-spin h-4 w-4 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
+                                  <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
+                                  <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
                                 </svg>
                                 Deleting...
                               </>
@@ -267,14 +290,20 @@ const VehiclesPage = () => {
                               'Delete'
                             )}
                           </button>
-                          {!vehicle.isPublished && (
+                          {publishingToggleId === vehicle.id ? (
+                            <button
+                              className='px-3 py-1.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200 text-sm font-medium'
+                            >
+                              {vehicle.isPublished ? 'UnPublishing...' : 'Publishing...'}
+                            </button>
+                          ) : (
                             <button
                               className='px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium'
                               onClick={() => {
-                                /* Handle publish */
+                                publishToggle(vehicle.id);
                               }}
                             >
-                              Publish
+                              {vehicle.isPublished ? 'Unpublish' : 'Publish'}
                             </button>
                           )}
                         </div>
@@ -285,29 +314,32 @@ const VehiclesPage = () => {
               </div>
             ) : (
               // Empty state when no vehicles from API
-              <div className='col-span-full text-center py-12'>
+              <div className='text-center py-12'>
                 <svg className='w-24 h-24 text-gray-300 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' />
                 </svg>
                 <h3 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>No vehicles listed</h3>
                 <p className='text-gray-600 dark:text-gray-300 mb-6'>Start earning by listing your first vehicle</p>
-                <button className='px-6 py-3 bg-[#428d42] text-white rounded-lg hover:bg-[#357a35] transition-colors duration-200 font-medium'>List Your First Vehicle</button>
+                <button onClick={() => router.push('/vehicle-listing')} className='px-6 py-3 bg-[#428d42] text-white rounded-lg hover:bg-[#357a35] transition-colors duration-200 font-medium'>
+                  List Your First Vehicle
+                </button>
               </div>
             )}
-          </div>{' '}
-          {/* Empty State (if no vehicles) */}
-          {vehiclesData.length === 0 && (
-            <div className='text-center py-12'>
-              <svg className='w-24 h-24 text-gray-300 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' />
-              </svg>
-              <h3 className='text-xl font-semibold text-gray-900 dark:text-white mb-2'>No vehicles listed</h3>
-              <p className='text-gray-600 dark:text-gray-300 mb-6'>Start earning by listing your first vehicle</p>
-              <button className='px-6 py-3 bg-[#428d42] text-white rounded-lg hover:bg-[#357a35] transition-colors duration-200 font-medium'>List Your First Vehicle</button>
-            </div>
-          )}
+          </div>
         </div>
       </ProtectedRoute>
+
+      <ConfirmationPopup
+        isOpen={showDeleteConfirm}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title='Delete Vehicle'
+        message={`Are you sure you want to delete "${vehicleToDelete?.title}"? This action cannot be undone and will permanently remove the vehicle and all its associated images.`}
+        confirmText='Yes, Delete'
+        cancelText='Cancel'
+        confirmButtonColor='bg-red-600 hover:bg-red-700'
+        isLoading={deletingId !== null}
+      />
     </>
   );
 };

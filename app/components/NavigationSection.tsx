@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { HiMenu, HiX, HiHeart, HiPlus, HiChartBar, HiUser, HiQuestionMarkCircle, HiShieldCheck, HiInformationCircle, HiSupport, HiLogout, HiLogin, HiUserAdd, HiChevronRight, HiHome, HiTruck } from 'react-icons/hi';
 import { RootState } from '../../redux/store';
 import { setUser } from '@/redux/slice/userSlice';
+import { useAuth } from '../hooks/useAuth';
 
 interface NavigationItem {
   icon: React.ComponentType<any>;
@@ -24,6 +25,7 @@ const NavigationSection = () => {
   const router = useRouter();
   const userDetails = useSelector((store: RootState) => store.user.value);
   const dispatch = useDispatch();
+  const { logout } = useAuth();
 
   // Navigation items configuration
   const primaryNavItems: NavigationItem[] = [
@@ -55,6 +57,7 @@ const NavigationSection = () => {
     dispatch(setUser({ id: '', email: '', name: '' }));
     setIsDesktopMenuOpen(false);
     setIsMobileMenuOpen(false);
+    logout();
   }, [dispatch, router]);
 
   useEffect(() => {
@@ -96,7 +99,7 @@ const NavigationSection = () => {
             {/* Logo */}
             <Link href='/' className='flex items-center space-x-2 group'>
               <div className='relative w-12 h-12 rounded-full overflow-hidden'>
-                <img src='/logo-min.png'  alt='Rent Vehicle Logo' className='object-cover group-hover:scale-110 transition-transform duration-200' />
+                <img src='/logo-min.png' alt='Rent Vehicle Logo' className='object-cover group-hover:scale-110 transition-transform duration-200' />
               </div>
               <span className='hidden sm:block text-xl font-bold text-gray-900'>
                 Rent<span className='text-blue-600'>Vehicle</span>
