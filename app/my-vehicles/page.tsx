@@ -40,7 +40,9 @@ const VehiclesPage = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [publishingToggleId, setPublishingToggleId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showUnpublishConfirm, setShowUnpublishConfirm] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
+  const [vehicleToUnpublish, setVehicleToUnpublish] = useState<Vehicle | null>(null);
   const { token, userId } = useAuth();
   const router = useRouter();
 
@@ -75,7 +77,6 @@ const VehiclesPage = () => {
     if (!vehicleToDelete) return;
 
     setDeletingId(vehicleToDelete.id);
-    setShowDeleteConfirm(false);
 
     try {
       if (!token) {
@@ -100,6 +101,8 @@ const VehiclesPage = () => {
       if (vehicleToDelete.isPublished) {
         localStorage.removeItem('vehicles_cache');
       }
+
+      setShowDeleteConfirm(false);
 
       setVehiclesData((prev) => prev.filter((vehicle) => vehicle.id !== vehicleToDelete.id));
     } catch (error) {
@@ -133,6 +136,7 @@ const VehiclesPage = () => {
       }
 
       localStorage.removeItem('vehicles_cache');
+      setShowUnpublishConfirm(false);
 
       setVehiclesData((prev) => prev.map((vehicle) => (vehicle.id === vehicleId ? { ...vehicle, isPublished: !vehicle.isPublished } : vehicle)));
     } catch (error) {
@@ -297,8 +301,8 @@ const VehiclesPage = () => {
                               'Delete'
                             )}
                           </button>
-                          {publishingToggleId === vehicle.id ? (
-                            <button className='px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg transition-all duration-200 text-sm font-medium flex items-center gap-2 cursor-not-allowed opacity-80' disabled>
+                          {publishingToggleId === vehicle.id && !vehicle.isPublished ? (
+                            <button className='px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg transition-all duration-200 text-sm font-medium flex items-center gap-2 cursor-not-allowed opacity-80' disabled>
                               <svg className='animate-spin h-4 w-4 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
                                 <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
                                 <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
@@ -310,7 +314,12 @@ const VehiclesPage = () => {
                                 vehicle.isPublished ? 'bg-[#fef9c3] hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-orange-500/25' : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-emerald-500/25'
                               }`}
                               onClick={() => {
-                                publishToggle(vehicle.id);
+                                if (vehicle.isPublished) {
+                                  setVehicleToUnpublish(vehicle);
+                                  setShowUnpublishConfirm(true);
+                                } else {
+                                  publishToggle(vehicle.id);
+                                }
                               }}
                             >
                               {vehicle.isPublished ? (
@@ -352,6 +361,18 @@ const VehiclesPage = () => {
           </div>
         </div>
       </ProtectedRoute>
+
+      <ConfirmationPopup
+        isOpen={showUnpublishConfirm}
+        onClose={() => setShowUnpublishConfirm(false)}
+        onConfirm={() => publishToggle(vehicleToUnpublish?.id || '')}
+        title='Unpublish Vehicle'
+        message={`Are you sure you want to unpublish "${vehicleToUnpublish?.title}"? This action will remove the vehicle from public listings.`}
+        confirmText='Yes, Unpublish'
+        cancelText='Cancel'
+        confirmButtonColor='bg-red-600 hover:bg-red-700'
+        isLoading={publishingToggleId !== null}
+      />
 
       <ConfirmationPopup
         isOpen={showDeleteConfirm}
