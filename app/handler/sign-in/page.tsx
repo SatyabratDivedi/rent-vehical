@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { FaGoogle, FaGithub, FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { useAuth } from '@/app/hooks/useAuth';
+import {toast} from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SignIn() {
   const [number, setNumber] = useState('');

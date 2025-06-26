@@ -4,7 +4,7 @@ import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { Providers } from './providers';
 import Navbar from './components/Navbar';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from 'sonner';
 import { ReduxProvider } from './providers/ReduxProvider';
 import AuthCheck from './components/AuthCheck';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -369,7 +369,7 @@ export default function RootLayout({
           <AuthCheck>
             <NavigationSection/>
             <ThemeProvider attribute='class' defaultTheme='light' enableSystem>
-              <Toaster reverseOrder={false} />
+              <Toaster richColors />
               <Providers>{children}</Providers>
             </ThemeProvider>
           </AuthCheck>

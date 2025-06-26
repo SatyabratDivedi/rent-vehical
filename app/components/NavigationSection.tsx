@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { HiMenu, HiX, HiHeart, HiPlus, HiChartBar, HiUser, HiQuestionMarkCircle, HiShieldCheck, HiInformationCircle, HiSupport, HiLogout, HiLogin, HiUserAdd, HiChevronRight, HiHome, HiTruck } from 'react-icons/hi';
 import { RootState } from '../../redux/store';
 import { setUser } from '@/redux/slice/userSlice';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 interface NavigationItem {
   icon: React.ComponentType<any>;

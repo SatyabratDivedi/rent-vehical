@@ -3,7 +3,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import Image from 'next/image';
 import ProtectedRoute from '../components/ProtectedRoute';
 import ConfirmationPopup from '../components/ConfirmationPopup';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import { useRouter } from 'next/navigation';
 
 interface Vehicle {

@@ -3,7 +3,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { RootState } from '../../redux/store';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
+import {toast} from 'sonner';
 import Loader from './Loader';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {

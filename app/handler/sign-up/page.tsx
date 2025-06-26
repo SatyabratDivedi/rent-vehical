@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { FaGoogle, FaGithub, FaEyeSlash, FaEye, FaArrowLeft } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import {toast} from 'sonner';
 
 export default function SignUp() {
   const [name, setName] = useState('');
