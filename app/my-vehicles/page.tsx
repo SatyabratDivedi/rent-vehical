@@ -132,22 +132,21 @@ const VehiclesPage = () => {
       });
 
       const data = await response.json();
-      console.log('Publish Toggle Response:', data);
 
       if (!response.ok) {
         toast.error(data.message || 'Failed to publish vehicle', { id: 'toggle' });
         throw new Error(data.message || 'Failed to publish vehicle');
       }
 
-      toast.success(!data.data.isPublished ? 'Vehicle unpublished successfully' : 'Vehicle published successfully', { id: 'toggle' });
       localStorage.removeItem('vehicles_cache');
       setShowUnpublishConfirm(false);
-
+      
       setVehiclesData((prev) => prev.map((vehicle) => (vehicle.id === vehicleId ? { ...vehicle, isPublished: !vehicle.isPublished } : vehicle)));
+      toast.success((!data.data.isPublished ? 'Vehicle unpublished successfully' : 'Vehicle published successfully'), { id: 'toggle' });
     } catch (error) {
       console.error('Error publishing vehicle:', error);
     } finally {
-      toast.dismiss('toggle');
+      // toast.dismiss('toggle');
       setPublishingToggleId(null);
     }
   };
