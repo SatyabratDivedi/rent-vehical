@@ -5,6 +5,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  vehiclesCount?: number;
+  requestsCount?: number;
 }
 
 export interface UserState {
@@ -16,6 +18,8 @@ const initialState: UserState = {
     id: '',
     email: '',
     name: '',
+    vehiclesCount: 0,
+    requestsCount: 0,
   },
 };
 

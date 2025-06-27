@@ -5,6 +5,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import ConfirmationPopup from '../components/ConfirmationPopup';
 import { useAuth } from '../../hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface Vehicle {
   id: string;
@@ -120,6 +121,7 @@ const VehiclesPage = () => {
 
   const publishToggle = async (vehicleId: string) => {
     setPublishingToggleId(vehicleId);
+    toast.loading('Please Wait...', { id: 'toggle' });
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/toggle-publish-vehicle/${vehicleId}`, {
         method: 'PUT',
@@ -130,11 +132,14 @@ const VehiclesPage = () => {
       });
 
       const data = await response.json();
+      console.log('Publish Toggle Response:', data);
 
       if (!response.ok) {
+        toast.error(data.message || 'Failed to publish vehicle', { id: 'toggle' });
         throw new Error(data.message || 'Failed to publish vehicle');
       }
 
+      toast.success(!data.data.isPublished ? 'Vehicle unpublished successfully' : 'Vehicle published successfully', { id: 'toggle' });
       localStorage.removeItem('vehicles_cache');
       setShowUnpublishConfirm(false);
 
@@ -142,6 +147,7 @@ const VehiclesPage = () => {
     } catch (error) {
       console.error('Error publishing vehicle:', error);
     } finally {
+      toast.dismiss('toggle');
       setPublishingToggleId(null);
     }
   };

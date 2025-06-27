@@ -7,6 +7,7 @@ import Image from 'next/image';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 interface Location {
   latitude: string;
@@ -475,10 +476,14 @@ export default function VehiclePage() {
       setError('Please enter a valid 6-digit PIN code');
       return;
     }
-
     setIsSubmitting(true);
     setError('');
+
     try {
+      toast.loading('Submitting your vehicle details...', {
+        id: 'submit-vehicle',
+      });
+      
       const submitFormData = new FormData();
       submitFormData.append('title', formData.title);
       submitFormData.append('description', formData.description);
@@ -507,14 +512,22 @@ export default function VehiclePage() {
         },
         body: submitFormData,
       });
+      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error('Failed to upload vehicle');
+      if (!data.success || !response.ok) {
+        toast.error(`Error: ${data.error || 'Failed to submit vehicle details'}`, {
+          id: 'submit-vehicle',
+        });
+        return console.log('Error response:', data);
       }
       localStorage.removeItem('vehicles_cache');
       setIsSuccess(true);
 
       imagePreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
+
+      toast.success('Vehicle Uploaded successfully!', {
+        id: 'submit-vehicle',
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -531,8 +544,10 @@ export default function VehiclePage() {
               <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
             </svg>
           </div>
-          <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>Vehicle Drafted Successfully!</h2>
-          <Link href='/my-vehicles' className='text-gray-600 dark:text-gray-300 mb-6'>Your vehicle has been added to the draft. You can live and edit it in your vehicle lists.</Link>
+          <h2 className='text-2xl font-bold text-gray-900 dark:text-white mb-4'>Vehicle Uploaded Successfully!</h2>
+          <Link href='/my-vehicles' className='text-gray-600 dark:text-gray-300 mb-6'>
+            Your vehicle has been published. You can view and edit it in your vehicle lists.
+          </Link>
           <button
             onClick={() => {
               setIsSuccess(false);
