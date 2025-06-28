@@ -339,9 +339,62 @@ const VehicleListContent = () => {
     return vehiclesWithDistance.sort((a, b) => a.calculatedDistance - b.calculatedDistance).map(({ calculatedDistance, ...vehicle }) => vehicle);
   }, []);
 
+  const fetchVehicles = useCallback(async () => {
+    try {
+      setIsFromCache(false);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch vehicles');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setVehicles(data.data);
+        setFilteredVehicles(data.data);
+        setCachedData(data.data); // Cache the data
+        console.log('fetched vehicles:', data.data);
+        dispatch(setVehicle(data.data)); // Dispatch to Redux store
+      } else {
+        throw new Error(data.error || 'Failed to fetch vehicles');
+      }
+    } catch (err) {
+      console.error('Error fetching vehicles:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  }, [dispatch]);
+
+  const loadVehicles = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Check cache first
+      const cachedVehicles = getCachedData();
+      if (cachedVehicles && cachedVehicles.length > 0) {
+        setVehicles(cachedVehicles);
+        setFilteredVehicles(cachedVehicles);
+        setIsFromCache(true);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch from API if no cache
+      await fetchVehicles();
+    } catch (err) {
+      console.error('Error loading vehicles:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLoading(false);
+    }
+  }, [fetchVehicles]);
+
   useEffect(() => {
     loadVehicles();
-  }, []);
+  }, [loadVehicles]);
   useEffect(() => {
     if (vehicles.length === 0) return;
 
@@ -507,58 +560,6 @@ const VehicleListContent = () => {
     }
   };
 
-  const loadVehicles = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Check cache first
-      const cachedVehicles = getCachedData();
-      if (cachedVehicles && cachedVehicles.length > 0) {
-        setVehicles(cachedVehicles);
-        setFilteredVehicles(cachedVehicles);
-        setIsFromCache(true);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch from API if no cache
-      await fetchVehicles();
-    } catch (err) {
-      console.error('Error loading vehicles:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setLoading(false);
-    }
-  };
-
-  const fetchVehicles = async () => {
-    try {
-      setIsFromCache(false);
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch vehicles');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setVehicles(data.data);
-        setFilteredVehicles(data.data);
-        setCachedData(data.data); // Cache the data
-        console.log('fetched vehicles:', data.data);
-        dispatch(setVehicle(data.data)); // Dispatch to Redux store
-      } else {
-        throw new Error(data.error || 'Failed to fetch vehicles');
-      }
-    } catch (err) {
-      console.error('Error fetching vehicles:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
   const handleRetry = async () => {
     setForcedLoading(true);
 
@@ -587,75 +588,133 @@ const VehicleListContent = () => {
     <div className=' dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
       <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Header */}
-        {/* Distance Filter Section */}
-        <div className='mb-6 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-gray-700'>
-          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-            <div className='flex flex-col sm:flex-row sm:items-center gap-3'>
-              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>Filter by Distance</h3>
-              <div className='flex flex-wrap gap-2'>
-                <button onClick={() => handleDistanceFilterChange('all')} className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${distanceFilter === 'all' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
-                  All Vehicles
-                </button>
-                <button onClick={() => handleDistanceFilterChange('10km')} disabled={locationLoading} className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '10km' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
-                  {locationLoading && distanceFilter !== '10km' ? (
-                    <div className='flex items-center gap-2'>
-                      <div className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin'></div>
-                      <span>Within 10km</span>
-                    </div>
-                  ) : (
-                    'Within 10km'
-                  )}
-                </button>
-                <button onClick={() => handleDistanceFilterChange('50km')} disabled={locationLoading} className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '50km' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
-                  Within 50km
-                </button>
-                <button
-                  onClick={() => handleDistanceFilterChange('100km')}
-                  disabled={locationLoading}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '100km' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-                >
-                  Within 100km
-                </button>
+        {/* Compact Distance Filter & Results Header */}
+        <div className='mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4'>
+          {/* Top Section: Title + Location Status */}
+          <div className='flex items-center justify-between gap-3 mb-4'>
+            <div className='flex items-center gap-2'>
+              <div className='p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg'>
+                <svg className='w-4 h-4 text-blue-600 dark:text-blue-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
+                </svg>
               </div>
+              <h3 className='text-base font-semibold text-gray-900 dark:text-white'>Distance Filter</h3>
             </div>
 
-            {/* Location Status */}
-            <div className='flex items-center gap-2 text-sm'>
+            {/* Location Status - Compact */}
+            <div className='flex items-center gap-2'>
               {userLocation && (
-                <div className='flex items-center gap-1 text-green-600 dark:text-green-400'>
-                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
-                  </svg>
-                  <span>Location enabled</span>
+                <div className='flex items-center gap-1.5 px-2 py-1 bg-green-50 dark:bg-green-900/30 rounded-full'>
+                  <div className='w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse'></div>
+                  <span className='text-xs font-medium text-green-700 dark:text-green-300'>Active</span>
                 </div>
               )}
               {locationError && (
-                <div className='flex items-center gap-1 text-red-600 dark:text-red-400'>
-                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <div className='flex items-center gap-1.5 px-2 py-1 bg-red-50 dark:bg-red-900/30 rounded-full'>
+                  <svg className='w-3 h-3 text-red-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                     <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
                   </svg>
-                  <span className='text-xs'>{locationError}</span>
+                  <span className='text-xs font-medium text-red-700 dark:text-red-300'>Error</span>
                 </div>
               )}
             </div>
           </div>
-        </div>
-        <div className='mb-6 flex justify-between items-center'>
-          <div className='flex items-center space-x-4'>
-            <p className='text-gray-600 dark:text-gray-300'>
-              Showing {filteredVehicles.length} vehicle{filteredVehicles.length !== 1 ? 's' : ''}
-              {distanceFilter !== 'all' && vehicles.length !== filteredVehicles.length && <span className='text-gray-500 dark:text-gray-400'> of {vehicles.length} total</span>}
-            </p>
-            {/* {isFromCache && <span className='text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full'>Cached (10 min)</span>} */}
+
+          {/* Filter Buttons - Compact Design */}
+          <div className='grid grid-cols-4 gap-2 mb-4'>
+            <button
+              onClick={() => handleDistanceFilterChange('all')}
+              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                distanceFilter === 'all' 
+                  ? 'bg-blue-500 text-white shadow-md' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              All
+            </button>
+
+            <button
+              onClick={() => handleDistanceFilterChange('10km')}
+              disabled={locationLoading}
+              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                distanceFilter === '10km' 
+                  ? 'bg-green-500 text-white shadow-md' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              {locationLoading && distanceFilter !== '10km' ? (
+                <div className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin'></div>
+              ) : (
+                '10km'
+              )}
+            </button>
+
+            <button
+              onClick={() => handleDistanceFilterChange('50km')}
+              disabled={locationLoading}
+              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                distanceFilter === '50km' 
+                  ? 'bg-orange-500 text-white shadow-md' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              50km
+            </button>
+
+            <button
+              onClick={() => handleDistanceFilterChange('100km')}
+              disabled={locationLoading}
+              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                distanceFilter === '100km' 
+                  ? 'bg-purple-500 text-white shadow-md' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              100km
+            </button>
           </div>
-          <button onClick={handleRefresh} className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 flex items-center space-x-1'>
-            <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' />
-            </svg>
-            <span>Refresh</span>
-          </button>
+
+          {/* Results Summary + Refresh Button */}
+          <div className='flex items-center justify-between gap-4 pt-3 border-t border-gray-100 dark:border-gray-700'>
+            <div className='flex items-center gap-2'>
+              <div className='p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg'>
+                <svg className='w-4 h-4 text-blue-600 dark:text-blue-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' />
+                </svg>
+              </div>
+              <div>
+                <p className='text-sm font-semibold text-gray-900 dark:text-white'>
+                  {filteredVehicles.length} Vehicle{filteredVehicles.length !== 1 ? 's' : ''}
+                </p>
+                {distanceFilter !== 'all' && vehicles.length !== filteredVehicles.length && (
+                  <p className='text-xs text-gray-500 dark:text-gray-400'>
+                    of {vehicles.length} total
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className='relative group'>
+              <button 
+                onClick={handleRefresh} 
+                className='flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm'
+              >
+                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' />
+                </svg>
+                <span className='hidden sm:inline'>Refresh</span>
+              </button>
+
+              {/* Tooltip */}
+              <div className='absolute bottom-full right-0 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 invisible transform translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 pointer-events-none z-10'>
+                Refresh vehicles
+                <div className='absolute top-full right-3 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-gray-900 dark:border-t-gray-700'></div>
+              </div>
+            </div>
+          </div>
         </div>
+
         {(loading || forcedLoading) && (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
             {[...Array(8)].map((_, index) => (
