@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 import { setSingleVehicle, setVehicle } from '@/redux/slice/vehicleSlice';
 import { Metadata } from 'next';
+import { toast } from 'sonner';
 
 const metadata: Metadata = {
   title: 'Browse Available Vehicles for Rent | Cars, Trucks, Tractors, Auto Rickshaw Near You',
@@ -72,6 +73,14 @@ export interface Vehicle {
     name: string;
     email: string;
   };
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    district?: string;
+    state?: string;
+    pinCode?: string;
+  };
 }
 
 // Loading skeleton component
@@ -91,7 +100,7 @@ const VehicleCardSkeleton = () => (
 );
 
 // Vehicle card component
-const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
+const VehicleCard = ({ vehicle, userLocation }: { vehicle: Vehicle; userLocation?: { lat: number; lng: number } | null }) => {
   const [imageError, setImageError] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const router = useRouter();
@@ -112,6 +121,7 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
       setCurrentImageIndex((prev) => (prev - 1 + vehicle.images.length) % vehicle.images.length);
     }
   };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -122,7 +132,31 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
 
   const handleViewDetails = () => {
     router.push(`/vehicle-details/${vehicle.id}`);
-    dispatch(setSingleVehicle(vehicle)); // Dispatch the selected vehicle to Redux store
+    dispatch(setSingleVehicle(vehicle));
+  };
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance;
+  };
+
+  const getDistanceText = (): string | null => {
+    if (!userLocation || !vehicle.location?.latitude || !vehicle.location?.longitude) {
+      return null;
+    }
+
+    const distance = calculateDistance(userLocation.lat, userLocation.lng, vehicle.location.latitude, vehicle.location.longitude);
+
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)}m away`;
+    } else {
+      return `${distance.toFixed(1)}km away`;
+    }
   };
 
   return (
@@ -179,6 +213,15 @@ const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => {
             </svg>
             {vehicle.user.name}
           </div>
+          {getDistanceText() && (
+            <div className='flex items-center text-xs text-[#428d42] dark:text-[#428d42] font-medium'>
+              <svg className='w-3 h-3 mr-1' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
+              </svg>
+              {getDistanceText()}
+            </div>
+          )}
           {/* <div className='text-gray-500 dark:text-gray-400'>{formatDate(vehicle.createdAt)}</div> */}
         </div>
         {/* Images count */}
@@ -247,17 +290,222 @@ const setCachedData = (data: Vehicle[]) => {
 };
 
 // Main vehicle list component
-const VehicleListPage = () => {
+const VehicleListContent = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [forcedLoading, setForcedLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { theme } = useTheme();
+
+  const distanceFilter = searchParams.get('distance') || 'all';
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance;
+  };
+
+  const filterVehiclesByDistance = useCallback((vehicleList: Vehicle[], maxDistance: number | null, userLat: number, userLng: number): Vehicle[] => {
+    if (!maxDistance || !userLat || !userLng) {
+      return vehicleList;
+    }
+
+    const vehiclesWithDistance = vehicleList
+      .filter((vehicle) => {
+        if (!vehicle.location?.latitude || !vehicle.location?.longitude) {
+          return false;
+        }
+
+        const distance = calculateDistance(userLat, userLng, vehicle.location.latitude, vehicle.location.longitude);
+        return distance <= maxDistance;
+      })
+      .map((vehicle) => ({
+        ...vehicle,
+        calculatedDistance: calculateDistance(userLat, userLng, vehicle.location!.latitude, vehicle.location!.longitude),
+      }));
+
+    return vehiclesWithDistance.sort((a, b) => a.calculatedDistance - b.calculatedDistance).map(({ calculatedDistance, ...vehicle }) => vehicle);
+  }, []);
+
   useEffect(() => {
     loadVehicles();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (vehicles.length === 0) return;
+
+    const applyDistanceFilter = async () => {
+      if (distanceFilter === 'all') {
+        if (userLocation) {
+          const vehiclesWithDistance = vehicles
+            .filter((vehicle) => vehicle.location?.latitude && vehicle.location?.longitude)
+            .map((vehicle) => ({
+              ...vehicle,
+              calculatedDistance: calculateDistance(userLocation.lat, userLocation.lng, vehicle.location!.latitude, vehicle.location!.longitude),
+            }))
+            .sort((a, b) => a.calculatedDistance - b.calculatedDistance)
+            .map(({ calculatedDistance, ...vehicle }) => vehicle);
+
+          const vehiclesWithoutLocation = vehicles.filter((vehicle) => !vehicle.location?.latitude || !vehicle.location?.longitude);
+
+          setFilteredVehicles([...vehiclesWithDistance, ...vehiclesWithoutLocation]);
+        } else {
+          setFilteredVehicles(vehicles);
+        }
+        return;
+      }
+
+      if (!userLocation && (distanceFilter === '10km' || distanceFilter === '50km' || distanceFilter === '100km')) {
+        try {
+          setLocationLoading(true);
+          const location = await getCurrentLocation();
+          setUserLocation(location);
+
+          const maxDistance = distanceFilter === '10km' ? 10 : distanceFilter === '50km' ? 50 : distanceFilter === '100km' ? 100 : null;
+
+          const filtered = filterVehiclesByDistance(vehicles, maxDistance, location.lat, location.lng);
+          setFilteredVehicles(filtered);
+        } catch (err) {
+          setLocationError(err instanceof Error ? err.message : 'Failed to get location');
+          const resetParams = new URLSearchParams(searchParams);
+          resetParams.delete('distance');
+          const resetUrl = resetParams.toString() ? `/vehicles?${resetParams.toString()}` : '/vehicles';
+          router.push(resetUrl, { scroll: false });
+          setFilteredVehicles(vehicles);
+        } finally {
+          setLocationLoading(false);
+        }
+      } else if (userLocation) {
+        // Use existing location
+        const maxDistance = distanceFilter === '10km' ? 10 : distanceFilter === '50km' ? 50 : distanceFilter === '100km' ? 100 : null;
+
+        const filtered = filterVehiclesByDistance(vehicles, maxDistance, userLocation.lat, userLocation.lng);
+        setFilteredVehicles(filtered);
+      }
+    };
+
+    applyDistanceFilter();
+  }, [vehicles, distanceFilter, searchParams, router, userLocation, filterVehiclesByDistance]);
+
+  const getCurrentLocation = (): Promise<{ lat: number; lng: number }> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by this browser.'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          let errorMessage = 'Unable to retrieve your location.';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location access denied by user.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = 'Location information is unavailable.';
+              break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out.';
+              break;
+          }
+          reject(new Error(errorMessage));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 600000,
+        }
+      );
+    });
+  };
+
+  const handleDistanceFilterChange = async (selectedDistance: string) => {
+    if (selectedDistance === distanceFilter) return;
+
+    setForcedLoading(true);
+
+    const params = new URLSearchParams(searchParams);
+    if (selectedDistance === 'all') {
+      params.delete('distance');
+    } else {
+      params.set('distance', selectedDistance);
+    }
+
+    const newUrl = params.toString() ? `/vehicles?${params.toString()}` : '/vehicles';
+    router.push(newUrl, { scroll: false });
+
+    setLocationError(null);
+
+    try {
+      if (selectedDistance === 'all') {
+        if (userLocation) {
+          const vehiclesWithDistance = vehicles
+            .filter((vehicle) => vehicle.location?.latitude && vehicle.location?.longitude)
+            .map((vehicle) => ({
+              ...vehicle,
+              calculatedDistance: calculateDistance(userLocation.lat, userLocation.lng, vehicle.location!.latitude, vehicle.location!.longitude),
+            }))
+            .sort((a, b) => a.calculatedDistance - b.calculatedDistance)
+            .map(({ calculatedDistance, ...vehicle }) => vehicle);
+
+          const vehiclesWithoutLocation = vehicles.filter((vehicle) => !vehicle.location?.latitude || !vehicle.location?.longitude);
+
+          setFilteredVehicles([...vehiclesWithDistance, ...vehiclesWithoutLocation]);
+        } else {
+          setFilteredVehicles(vehicles);
+        }
+      } else {
+        if (!userLocation) {
+          setLocationLoading(true);
+          try {
+            const location = await getCurrentLocation();
+            setUserLocation(location);
+
+            const maxDistance = selectedDistance === '10km' ? 10 : selectedDistance === '50km' ? 50 : selectedDistance === '100km' ? 100 : null;
+
+            const filtered = filterVehiclesByDistance(vehicles, maxDistance, location.lat, location.lng);
+            setFilteredVehicles(filtered);
+          } catch (err) {
+            toast.error(locationError);
+            setLocationError(err instanceof Error ? err.message : 'Failed to get location');
+            const resetParams = new URLSearchParams(searchParams);
+            resetParams.delete('distance');
+            const resetUrl = resetParams.toString() ? `/vehicles?${resetParams.toString()}` : '/vehicles';
+            router.push(resetUrl, { scroll: false });
+            setFilteredVehicles(vehicles);
+          } finally {
+            setLocationLoading(false);
+          }
+        } else {
+          const maxDistance = selectedDistance === '10km' ? 10 : selectedDistance === '50km' ? 50 : selectedDistance === '100km' ? 100 : null;
+
+          const filtered = filterVehiclesByDistance(vehicles, maxDistance, userLocation.lat, userLocation.lng);
+          setFilteredVehicles(filtered);
+        }
+      }
+    } finally {
+      setTimeout(() => {
+        setForcedLoading(false);
+      }, 100);
+    }
+  };
 
   const loadVehicles = async () => {
     try {
@@ -268,6 +516,7 @@ const VehicleListPage = () => {
       const cachedVehicles = getCachedData();
       if (cachedVehicles && cachedVehicles.length > 0) {
         setVehicles(cachedVehicles);
+        setFilteredVehicles(cachedVehicles);
         setIsFromCache(true);
         setLoading(false);
         return;
@@ -296,10 +545,10 @@ const VehicleListPage = () => {
 
       if (data.success) {
         setVehicles(data.data);
+        setFilteredVehicles(data.data);
         setCachedData(data.data); // Cache the data
         console.log('fetched vehicles:', data.data);
         dispatch(setVehicle(data.data)); // Dispatch to Redux store
-        setVehicles(data.data);
       } else {
         throw new Error(data.error || 'Failed to fetch vehicles');
       }
@@ -310,30 +559,104 @@ const VehicleListPage = () => {
       setLoading(false);
     }
   };
-  const handleRetry = () => {
-    fetchVehicles(); // Force fresh fetch from API
+  const handleRetry = async () => {
+    setForcedLoading(true);
+
+    try {
+      await fetchVehicles();
+    } finally {
+      setTimeout(() => {
+        setForcedLoading(false);
+      }, 100);
+    }
   };
 
-  const handleRefresh = () => {
-    fetchVehicles(); // Force fresh fetch from API
+  const handleRefresh = async () => {
+    setForcedLoading(true);
+
+    try {
+      await fetchVehicles();
+    } finally {
+      setTimeout(() => {
+        setForcedLoading(false);
+      }, 100);
+    }
   };
 
   return (
     <div className=' dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
-      {/* <button onClick={() => router.push('/')} className='flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 mb-4'>
-        <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
-        </svg>
-        Back to Home
-      </button> */}
       <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* Header */}
-        {/* <div className='text-center mb-12'>
-          <h1 className='text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4'>Vehicle Collection</h1>
-          <p className='text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto'>Explore our diverse collection of vehicles available for rent. Find the perfect ride for your next adventure.</p>
-        </div> */}
-        {/* Loading state */}
-        {loading && (
+        {/* Distance Filter Section */}
+        <div className='mb-6 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-200 dark:border-gray-700'>
+          <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+            <div className='flex flex-col sm:flex-row sm:items-center gap-3'>
+              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>Filter by Distance</h3>
+              <div className='flex flex-wrap gap-2'>
+                <button onClick={() => handleDistanceFilterChange('all')} className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${distanceFilter === 'all' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
+                  All Vehicles
+                </button>
+                <button onClick={() => handleDistanceFilterChange('10km')} disabled={locationLoading} className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '10km' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
+                  {locationLoading && distanceFilter !== '10km' ? (
+                    <div className='flex items-center gap-2'>
+                      <div className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin'></div>
+                      <span>Within 10km</span>
+                    </div>
+                  ) : (
+                    'Within 10km'
+                  )}
+                </button>
+                <button onClick={() => handleDistanceFilterChange('50km')} disabled={locationLoading} className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '50km' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
+                  Within 50km
+                </button>
+                <button
+                  onClick={() => handleDistanceFilterChange('100km')}
+                  disabled={locationLoading}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '100km' ? 'bg-[#428d42] text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                >
+                  Within 100km
+                </button>
+              </div>
+            </div>
+
+            {/* Location Status */}
+            <div className='flex items-center gap-2 text-sm'>
+              {userLocation && (
+                <div className='flex items-center gap-1 text-green-600 dark:text-green-400'>
+                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' />
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
+                  </svg>
+                  <span>Location enabled</span>
+                </div>
+              )}
+              {locationError && (
+                <div className='flex items-center gap-1 text-red-600 dark:text-red-400'>
+                  <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                  <span className='text-xs'>{locationError}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className='mb-6 flex justify-between items-center'>
+          <div className='flex items-center space-x-4'>
+            <p className='text-gray-600 dark:text-gray-300'>
+              Showing {filteredVehicles.length} vehicle{filteredVehicles.length !== 1 ? 's' : ''}
+              {distanceFilter !== 'all' && vehicles.length !== filteredVehicles.length && <span className='text-gray-500 dark:text-gray-400'> of {vehicles.length} total</span>}
+            </p>
+            {/* {isFromCache && <span className='text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full'>Cached (10 min)</span>} */}
+          </div>
+          <button onClick={handleRefresh} className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 flex items-center space-x-1'>
+            <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' />
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+        {(loading || forcedLoading) && (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
             {[...Array(8)].map((_, index) => (
               <VehicleCardSkeleton key={index} />
@@ -341,7 +664,7 @@ const VehicleListPage = () => {
           </div>
         )}
         {/* Error state */}
-        {error && !loading && (
+        {error && !loading && !forcedLoading && (
           <div className='text-center py-12'>
             <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-8 max-w-md mx-auto'>
               <svg className='w-16 h-16 text-red-500 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -356,7 +679,7 @@ const VehicleListPage = () => {
           </div>
         )}
         {/* Empty state */}
-        {!loading && !error && vehicles.length === 0 && (
+        {!loading && !forcedLoading && !error && vehicles.length === 0 && (
           <div className='text-center py-12'>
             <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md mx-auto'>
               <svg className='w-16 h-16 text-gray-400 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -368,32 +691,39 @@ const VehicleListPage = () => {
           </div>
         )}{' '}
         {/* Vehicle grid */}
-        {!loading && !error && vehicles.length > 0 && (
+        {!loading && !forcedLoading && !error && vehicles.length > 0 && (
           <>
-            <div className='mb-6 flex justify-between items-center'>
-              <div className='flex items-center space-x-4'>
-                <p className='text-gray-600 dark:text-gray-300'>
-                  Showing {vehicles.length} vehicle{vehicles.length !== 1 ? 's' : ''}
-                </p>
-                {isFromCache && <span className='text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full'>Cached (10 min)</span>}
-              </div>
-              <button onClick={handleRefresh} className='text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors duration-200 flex items-center space-x-1'>
-                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' />
-                </svg>
-                <span>Refresh</span>
-              </button>
-            </div>
-
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-              {vehicles.map((vehicle) => (
-                <VehicleCard key={vehicle.id} vehicle={vehicle} />
+              {filteredVehicles.map((vehicle) => (
+                <VehicleCard key={vehicle.id} vehicle={vehicle} userLocation={userLocation} />
               ))}
             </div>
           </>
         )}
       </div>
     </div>
+  );
+};
+
+// Loading component for Suspense fallback
+const VehicleListPageLoading = () => (
+  <div className='dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+    <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+        {[...Array(8)].map((_, index) => (
+          <VehicleCardSkeleton key={index} />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// Main wrapper component with Suspense
+const VehicleListPage = () => {
+  return (
+    <Suspense fallback={<VehicleListPageLoading />}>
+      <VehicleListContent />
+    </Suspense>
   );
 };
 

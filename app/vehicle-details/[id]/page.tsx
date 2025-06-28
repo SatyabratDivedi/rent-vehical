@@ -244,7 +244,7 @@ const VehicleDetailsPage = () => {
   };
 
   const handleBackToList = () => {
-    router.push('/vehicles');
+    router.back();
   };
 
   if (loading) {
