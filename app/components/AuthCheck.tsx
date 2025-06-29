@@ -40,7 +40,7 @@ const AuthCheck = ({ children }: { children: React.ReactNode }) => {
         }
       } else {
         console.error('Failed to fetch user details:', data.message);
-        dispatch(setUser({ id: '', email: '', name: 'Guest' }));
+        dispatch(setUser({ id: '', email: 'guest@gmail.com', name: 'Guest' }));
       }
     } catch (error) {
       console.error('Auth check failed:', error);
