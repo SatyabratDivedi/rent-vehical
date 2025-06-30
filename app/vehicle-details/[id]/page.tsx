@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { useRouter, useParams } from 'next/navigation';
 import { Vehicle } from '@/app/vehicles/page';
+import { toast } from 'sonner';
+import CountPopup from './CountPopup';
 
 // Loading skeleton for vehicle details
 const VehicleDetailsSkeleton = () => (
@@ -168,6 +170,9 @@ const setCachedVehicle = (vehicleId: string, data: Vehicle) => {
 const VehicleDetailsPage = () => {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [countRequestLoading, setCountRequestLoading] = useState(false);
+  const [countPopupOpen, setCountPopupOpen] = useState(false);
+  const [requestCount, setRequestCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
   const { theme } = useTheme();
@@ -247,6 +252,36 @@ const VehicleDetailsPage = () => {
     router.back();
   };
 
+  const token = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith('token='))
+    ?.split('=')[1];
+
+  const checkCount = async () => {
+    try {
+      setCountRequestLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/count_view`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setRequestCount(data.request_count);
+        setCountPopupOpen(true);
+        setCountRequestLoading(false);
+      } else {
+        toast.error(data.error);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setCountRequestLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className='min-h-screen  dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
@@ -288,6 +323,8 @@ const VehicleDetailsPage = () => {
 
   return (
     <div className='min-h-screen  dark:from-gray-900 dark:to-gray-800 py-8 px-4'>
+      <CountPopup isOpen={countPopupOpen} onClose={() => setCountPopupOpen(false)} requestCount={requestCount} increaseCount={() => setRequestCount((prev) => prev + 1)} vehicleId={vehicleId} />
+
       <div className='max-w-6xl mx-auto'>
         {/* Header with back button */}
         <div className='mb-8'>
@@ -343,7 +380,15 @@ const VehicleDetailsPage = () => {
             <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700'>
               <h3 className='text-lg font-semibold text-gray-900 dark:text-white mb-4'>Interested in this vehicle?</h3>
               <div className='space-y-3'>
-                <button className='w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md'>Contact Owner</button>
+                <button onClick={checkCount} className='w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md'>
+                  {countRequestLoading ? (
+                    <div className='flex justify-center items-center'>
+                      <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
+                    </div>
+                  ) : (
+                    'Contact Owner'
+                  )}
+                </button>
                 <button className='w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors duration-200'>Save to Favorites</button>
                 <button className='w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors duration-200'>Share Vehicle</button>
               </div>
