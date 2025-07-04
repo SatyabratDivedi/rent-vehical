@@ -64,7 +64,13 @@ const SearchPopup = ({ onClose }: SearchPopupProps) => {
           <p className='text-sm text-gray-500 dark:text-gray-400 mb-3'>Quick searches:</p>
           <div className='flex flex-wrap gap-2'>
             {['Car', 'Auto', 'Truck', 'Bolero'].map((suggestion) => (
-              <button key={suggestion} onClick={() => setSearchQuery(suggestion)} className='px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200'>
+              <button
+                key={suggestion}
+                onClick={() => {
+                  setSearchQuery(suggestion);
+                }}
+                className='px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-200'
+              >
                 {suggestion}
               </button>
             ))}

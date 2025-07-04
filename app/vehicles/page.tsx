@@ -509,12 +509,12 @@ const VehicleListContent = () => {
     });
   };
 
+  const params = new URLSearchParams(searchParams);
   const handleDistanceFilterChange = async (selectedDistance: string) => {
     if (selectedDistance === distanceFilter) return;
 
     setForcedLoading(true);
 
-    const params = new URLSearchParams(searchParams);
     if (selectedDistance === 'all') {
       params.delete('distance');
     } else {
@@ -611,7 +611,7 @@ const VehicleListContent = () => {
         {/* Compact Distance Filter & Results Header */}
         <div className='mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4'>
           {/* Top Section: Title + Location Status */}
-          <div className='flex items-center justify-between gap-3 mb-4'>
+          <div className='flex items-center justify-between flex-wrap gap-3 mb-4'>
             <div className='flex items-center gap-2'>
               <div className='p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg'>
                 <svg className='w-4 h-4 text-blue-600 dark:text-blue-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -619,34 +619,65 @@ const VehicleListContent = () => {
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 11a3 3 0 11-6 0 3 3 0 016 0z' />
                 </svg>
               </div>
-              <h3 className='text-base font-semibold text-gray-900 dark:text-white'>Distance Filter</h3>
+              <h3 className='text-sm md:text-base font-semibold text-gray-900 dark:text-white'>Filter</h3>
+              {params.get('search') && (
+                <div className='flex items-center gap-2 text-xs md:text-sm'>
+                  <span className='text-gray-600 dark:text-gray-400'>for:</span>
+                  <span
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams);
+                      params.delete('search');
+                      const newUrl = params.toString() ? `/vehicles?${params.toString()}` : '/vehicles';
+                      router.push(newUrl, { scroll: false });
+                    }}
+                    className='px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors duration-200 flex items-center gap-1'
+                  >
+                    {searchParams.get('search')}
+                    <svg className=' h-2 w-2 md:w-3 md:h-3' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+                    </svg>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Location Status - Compact */}
-            <div className='flex items-center gap-2'>
+            <div className='  flex items-center gap-2'>
               {userLocation && (
-                <div className='flex items-center gap-1.5 px-2 py-1 bg-green-50 dark:bg-green-900/30 rounded-full'>
+                <div className=' relative group flex items-center gap-1.5 px-2 py-1 bg-green-50 dark:bg-green-900/30 rounded-full'>
                   <div className='w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse'></div>
-                  <span className='text-xs font-medium text-green-700 dark:text-green-300'>Active</span>
+                  <span className='text-xs hidden md:inline font-medium text-green-700 dark:text-green-300'>Active</span>
+
+                  {/* Tooltip */}
+                  <div className='absolute bottom-full right-0 mb-2 px-2 py-1 bg-green-500  text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 invisible transform translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 pointer-events-none z-10'>
+                    {`Lat:${userLocation.lat.toFixed(2)}, Long:${userLocation.lng.toFixed(2)}`}
+                    <div className='absolute top-full right-3 w-0 h-0 border-l-4 border-r-2 border-t-4 border-transparent border-t-green-500 '></div>
+                  </div>
+                </div>
+              )}
+              {locationError && (
+                <div className=' relative group flex items-center gap-1.5 px-2 py-1 bg-red-50 dark:bg-red-900/30 rounded-full'>
+                  <svg className='w-3 h-3 text-red-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                  <span className='text-xs font-medium text-red-700 dark:text-red-300'>Error</span>
+
+                  {/* Tooltip */}
+                  <div className='absolute bottom-full right-0 mb-2 px-2 py-1 bg-red-400 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 invisible  transform translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 pointer-events-none z-10'>
+                    {locationError}
+                    <div className='absolute top-full right-3 w-1 h-1 border-l-4 border-r-2 border-t-4 border-transparent border-t-red-400 dark:border-t-gray-700'></div>
+                  </div>
                 </div>
               )}
               <div>
                 {showSearchPopup && <SearchPopup onClose={() => setShowSearchPopup(false)} />}
-                <button onClick={() => setShowSearchPopup(true)} className='group flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95'>
-                  <svg className='w-4 h-4 transition-transform duration-300 group-hover:rotate-12' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <button onClick={() => setShowSearchPopup(true)} className='group flex items-center gap-2 px-3 md:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95'>
+                  <svg className=' h-3 w-3 md:w-4 md:h-4 transition-transform duration-300 group-hover:rotate-12' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                     <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
                   </svg>
                   <span className='hidden sm:inline'>Search</span>
                 </button>
               </div>
-              {locationError && (
-                <div className='flex items-center gap-1.5 px-2 py-1 bg-red-50 dark:bg-red-900/30 rounded-full'>
-                  <svg className='w-3 h-3 text-red-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
-                  </svg>
-                  <span className='text-xs font-medium text-red-700 dark:text-red-300'>Error</span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -690,11 +721,16 @@ const VehicleListContent = () => {
                 </svg>
               </div>
               <div>
-                <p className='text-sm font-semibold text-gray-900 dark:text-white'>
+                <p className='text-xs md:text-sm font-semibold text-gray-900 dark:text-white'>
                   {filteredVehicles.length} Vehicle{filteredVehicles.length !== 1 ? 's' : ''}
                 </p>
                 {distanceFilter !== 'all' && vehicles.length !== filteredVehicles.length && <p className='text-xs text-gray-500 dark:text-gray-400'>of {vehicles.length} total</p>}
               </div>
+              {params.get('distance') && (
+                <span className='px-2 ml-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-[.6rem] md:text-xs font-medium'>
+                  within: <span className='font-semibold'>{params.get('distance')}</span>
+                </span>
+              )}
             </div>
 
             <div className='relative group'>
@@ -708,7 +744,7 @@ const VehicleListContent = () => {
               {/* Tooltip */}
               <div className='absolute bottom-full right-0 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded shadow-lg whitespace-nowrap opacity-0 invisible transform translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 pointer-events-none z-10'>
                 Refresh vehicles
-                <div className='absolute top-full right-3 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-gray-900 dark:border-t-gray-700'></div>
+                <div className='absolute top-full right-3 w-0 h-0 border-l-4 border-r-2 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700'></div>
               </div>
             </div>
           </div>
