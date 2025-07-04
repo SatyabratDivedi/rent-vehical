@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { setSingleVehicle, setVehicle } from '@/redux/slice/vehicleSlice';
 import { Metadata } from 'next';
 import { toast } from 'sonner';
+import SearchPopup from './SearchPopup';
 
 const metadata: Metadata = {
   title: 'Browse Available Vehicles for Rent | Cars, Trucks, Tractors, Auto Rickshaw Near You',
@@ -300,10 +301,28 @@ const VehicleListContent = () => {
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [forcedLoading, setForcedLoading] = useState(false);
+  const [showSearchPopup, setShowSearchPopup] = useState(false);
+  const [distanceFilteredVehicles, setDistanceFilteredVehicles] = useState<Vehicle[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
-  const { theme } = useTheme();
+
+  const applyAllFilters = useCallback(() => {
+    const query = searchParams.get('search') || '';
+
+    let vehiclesToFilter = distanceFilteredVehicles.length > 0 ? distanceFilteredVehicles : vehicles;
+
+    if (query) {
+      const filtered = vehiclesToFilter.filter((vehicle) => vehicle.title.toLowerCase().includes(query.toLowerCase()) || vehicle.description.toLowerCase().includes(query.toLowerCase()) || vehicle.user.name.toLowerCase().includes(query.toLowerCase()));
+      setFilteredVehicles(filtered);
+    } else {
+      setFilteredVehicles(vehiclesToFilter);
+    }
+  }, [searchParams, distanceFilteredVehicles, vehicles]);
+
+  useEffect(() => {
+    applyAllFilters();
+  }, [applyAllFilters]);
 
   const distanceFilter = searchParams.get('distance') || 'all';
 
@@ -395,6 +414,7 @@ const VehicleListContent = () => {
   useEffect(() => {
     loadVehicles();
   }, [loadVehicles]);
+
   useEffect(() => {
     if (vehicles.length === 0) return;
 
@@ -412,9 +432,9 @@ const VehicleListContent = () => {
 
           const vehiclesWithoutLocation = vehicles.filter((vehicle) => !vehicle.location?.latitude || !vehicle.location?.longitude);
 
-          setFilteredVehicles([...vehiclesWithDistance, ...vehiclesWithoutLocation]);
+          setDistanceFilteredVehicles([...vehiclesWithDistance, ...vehiclesWithoutLocation]);
         } else {
-          setFilteredVehicles(vehicles);
+          setDistanceFilteredVehicles(vehicles);
         }
         return;
       }
@@ -428,14 +448,14 @@ const VehicleListContent = () => {
           const maxDistance = distanceFilter === '10km' ? 10 : distanceFilter === '50km' ? 50 : distanceFilter === '100km' ? 100 : null;
 
           const filtered = filterVehiclesByDistance(vehicles, maxDistance, location.lat, location.lng);
-          setFilteredVehicles(filtered);
+          setDistanceFilteredVehicles(filtered);
         } catch (err) {
           setLocationError(err instanceof Error ? err.message : 'Failed to get location');
           const resetParams = new URLSearchParams(searchParams);
           resetParams.delete('distance');
           const resetUrl = resetParams.toString() ? `/vehicles?${resetParams.toString()}` : '/vehicles';
           router.push(resetUrl, { scroll: false });
-          setFilteredVehicles(vehicles);
+          setDistanceFilteredVehicles(vehicles);
         } finally {
           setLocationLoading(false);
         }
@@ -444,7 +464,7 @@ const VehicleListContent = () => {
         const maxDistance = distanceFilter === '10km' ? 10 : distanceFilter === '50km' ? 50 : distanceFilter === '100km' ? 100 : null;
 
         const filtered = filterVehiclesByDistance(vehicles, maxDistance, userLocation.lat, userLocation.lng);
-        setFilteredVehicles(filtered);
+        setDistanceFilteredVehicles(filtered);
       }
     };
 
@@ -520,9 +540,9 @@ const VehicleListContent = () => {
 
           const vehiclesWithoutLocation = vehicles.filter((vehicle) => !vehicle.location?.latitude || !vehicle.location?.longitude);
 
-          setFilteredVehicles([...vehiclesWithDistance, ...vehiclesWithoutLocation]);
+          setDistanceFilteredVehicles([...vehiclesWithDistance, ...vehiclesWithoutLocation]);
         } else {
-          setFilteredVehicles(vehicles);
+          setDistanceFilteredVehicles(vehicles);
         }
       } else {
         if (!userLocation) {
@@ -534,7 +554,7 @@ const VehicleListContent = () => {
             const maxDistance = selectedDistance === '10km' ? 10 : selectedDistance === '50km' ? 50 : selectedDistance === '100km' ? 100 : null;
 
             const filtered = filterVehiclesByDistance(vehicles, maxDistance, location.lat, location.lng);
-            setFilteredVehicles(filtered);
+            setDistanceFilteredVehicles(filtered);
           } catch (err) {
             toast.error(locationError);
             setLocationError(err instanceof Error ? err.message : 'Failed to get location');
@@ -542,7 +562,7 @@ const VehicleListContent = () => {
             resetParams.delete('distance');
             const resetUrl = resetParams.toString() ? `/vehicles?${resetParams.toString()}` : '/vehicles';
             router.push(resetUrl, { scroll: false });
-            setFilteredVehicles(vehicles);
+            setDistanceFilteredVehicles(vehicles);
           } finally {
             setLocationLoading(false);
           }
@@ -550,7 +570,7 @@ const VehicleListContent = () => {
           const maxDistance = selectedDistance === '10km' ? 10 : selectedDistance === '50km' ? 50 : selectedDistance === '100km' ? 100 : null;
 
           const filtered = filterVehiclesByDistance(vehicles, maxDistance, userLocation.lat, userLocation.lng);
-          setFilteredVehicles(filtered);
+          setDistanceFilteredVehicles(filtered);
         }
       }
     } finally {
@@ -610,6 +630,15 @@ const VehicleListContent = () => {
                   <span className='text-xs font-medium text-green-700 dark:text-green-300'>Active</span>
                 </div>
               )}
+              <div>
+                {showSearchPopup && <SearchPopup onClose={() => setShowSearchPopup(false)} />}
+                <button onClick={() => setShowSearchPopup(true)} className='group flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95'>
+                  <svg className='w-4 h-4 transition-transform duration-300 group-hover:rotate-12' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+                  </svg>
+                  <span className='hidden sm:inline'>Search</span>
+                </button>
+              </div>
               {locationError && (
                 <div className='flex items-center gap-1.5 px-2 py-1 bg-red-50 dark:bg-red-900/30 rounded-full'>
                   <svg className='w-3 h-3 text-red-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -623,41 +652,22 @@ const VehicleListContent = () => {
 
           {/* Filter Buttons - Compact Design */}
           <div className='grid grid-cols-4 gap-2 mb-4'>
-            <button
-              onClick={() => handleDistanceFilterChange('all')}
-              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                distanceFilter === 'all' 
-                  ? 'bg-blue-500 text-white shadow-md' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
+            <button onClick={() => handleDistanceFilterChange('all')} className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${distanceFilter === 'all' ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
               All
             </button>
 
             <button
               onClick={() => handleDistanceFilterChange('10km')}
               disabled={locationLoading}
-              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                distanceFilter === '10km' 
-                  ? 'bg-green-500 text-white shadow-md' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '10km' ? 'bg-green-500 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
             >
-              {locationLoading && distanceFilter !== '10km' ? (
-                <div className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin'></div>
-              ) : (
-                '10km'
-              )}
+              {locationLoading && distanceFilter !== '10km' ? <div className='w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin'></div> : '10km'}
             </button>
 
             <button
               onClick={() => handleDistanceFilterChange('50km')}
               disabled={locationLoading}
-              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                distanceFilter === '50km' 
-                  ? 'bg-orange-500 text-white shadow-md' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '50km' ? 'bg-orange-500 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
             >
               50km
             </button>
@@ -665,11 +675,7 @@ const VehicleListContent = () => {
             <button
               onClick={() => handleDistanceFilterChange('100km')}
               disabled={locationLoading}
-              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                distanceFilter === '100km' 
-                  ? 'bg-purple-500 text-white shadow-md' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+              className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${distanceFilter === '100km' ? 'bg-purple-500 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
             >
               100km
             </button>
@@ -687,19 +693,12 @@ const VehicleListContent = () => {
                 <p className='text-sm font-semibold text-gray-900 dark:text-white'>
                   {filteredVehicles.length} Vehicle{filteredVehicles.length !== 1 ? 's' : ''}
                 </p>
-                {distanceFilter !== 'all' && vehicles.length !== filteredVehicles.length && (
-                  <p className='text-xs text-gray-500 dark:text-gray-400'>
-                    of {vehicles.length} total
-                  </p>
-                )}
+                {distanceFilter !== 'all' && vehicles.length !== filteredVehicles.length && <p className='text-xs text-gray-500 dark:text-gray-400'>of {vehicles.length} total</p>}
               </div>
             </div>
 
             <div className='relative group'>
-              <button 
-                onClick={handleRefresh} 
-                className='flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm'
-              >
+              <button onClick={handleRefresh} className='flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-sm'>
                 <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' />
                 </svg>
@@ -714,7 +713,6 @@ const VehicleListContent = () => {
             </div>
           </div>
         </div>
-
         {(loading || forcedLoading) && (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
             {[...Array(8)].map((_, index) => (
