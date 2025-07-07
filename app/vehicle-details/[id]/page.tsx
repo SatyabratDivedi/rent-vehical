@@ -7,6 +7,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Vehicle } from '@/app/vehicles/page';
 import { toast } from 'sonner';
 import CountPopup from './CountPopup';
+import Link from 'next/link';
 
 // Loading skeleton for vehicle details
 const VehicleDetailsSkeleton = () => (
@@ -273,7 +274,14 @@ const VehicleDetailsPage = () => {
         setCountPopupOpen(true);
         setCountRequestLoading(false);
       } else {
-        toast.error(data.error);
+        toast.error(
+          <div className='flex gap-2'>
+            <span>{data.error}</span>
+            <Link href='/handler/sign-in' className='text-blue-500 hover:text-blue-700 underline font-medium'>
+              Login here
+            </Link>
+          </div>
+        );
       }
     } catch (error) {
       console.log(error);
