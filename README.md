@@ -6,7 +6,7 @@ A full-stack web application enabling vehicle owners to list their commercial ve
 
 ## 🔗 Project Demo
 
-🎥 [Watch Project Intro Video](https://www.loom.com/share/e4b6b36b5be047da8e5fbd7b64021bab?sid=98ba4dba-ceca-49b7-bfc9-866efbd801ed){:target="_blank"}
+🎥 [Watch Project Intro Video](https://www.loom.com/share/e4b6b36b5be047da8e5fbd7b64021bab?sid=98ba4dba-ceca-49b7-bfc9-866efbd801ed)
 
 ---
 
