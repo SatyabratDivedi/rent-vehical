@@ -362,7 +362,7 @@ const VehicleListContent = () => {
     try {
       setIsFromCache(false);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle/`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicle`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch vehicles');

@@ -136,7 +136,7 @@ try {
             </div>
             <div className='flex justify-between items-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
               <span className='text-xs sm:text-sm text-gray-600 dark:text-gray-300'>Remaining Number Request</span>
-              <span className='text-lg flex sm:text-xl font-bold text-blue-600'>{user.requestsCount || 0} /10</span>
+              <span className='text-lg flex sm:text-xl font-bold text-blue-600'>{user.requestsCount || 0} /5</span>
             </div>
           </div>
         </div>

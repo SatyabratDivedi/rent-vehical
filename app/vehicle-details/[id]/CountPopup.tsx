@@ -16,6 +16,8 @@ const CountPopup: React.FC<ConfirmationPopupProps> = ({ isOpen, onClose, increas
   const [number, setNumber] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
+  const requestCountLimit = 5;
+
   const token = document.cookie
     .split('; ')
     .find((row) => row.startsWith('token='))
@@ -114,13 +116,13 @@ const CountPopup: React.FC<ConfirmationPopupProps> = ({ isOpen, onClose, increas
 
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-2'>
-                      <span className={`text-lg font-bold ${requestCount >= 10 ?'text-red-500':'text-blue-600'}  dark:text-blue-400`}>{requestCount}</span>
-                      <span className='text-sm text-gray-600 dark:text-gray-400'>/ 10</span>
+                      <span className={`text-lg font-bold ${requestCount >= requestCountLimit ?'text-red-500':'text-blue-600'}  dark:text-blue-400`}>{requestCount}</span>
+                      <span className='text-sm text-gray-600 dark:text-gray-400'>/ {requestCountLimit}</span>
                     </div>
                     <div className='text-right'>
                       <p className='text-xs text-gray-500 dark:text-gray-400'>Requests remaining</p>
                       <div className='w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-1'>
-                        <div className='h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300' style={{ width: `${(requestCount / 10) * 100}%` }} />
+                        <div className='h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300' style={{ width: `${(requestCount / requestCountLimit) * 100}%` }} />
                       </div>
                     </div>
                   </div>
